@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parser TSV</title>
+</head>
+<body>
+    <h1>Parser TSV</h1>
+    <input type="file" id="fileInput" accept=".tsv" />
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const tsvContent = e.target.result;
+                    const data = parseTSV(tsvContent);
+                    
+                    let output = processing(data)
+
+                    let freqVar1 = output[0]
+                    let freqVar2 = output[1]
+                    let freqVar3 = output[2]
+                    let freqJointDist = output[3]
+
+                    displayData(freqVar1,"TeamLeader or teamPlayer")
+                    displayData(freqVar2,"HardWorker")
+                    displayData(freqVar3,"Height")
+                    displayData(freqJointDist,"LeaderOrPlayer X HardWorker")
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function parseTSV(tsv) {
+            const lines = tsv.split('\n');
+            const data = [];
+            for (let line of lines) {
+                const row = line.split('\t');
+                data.push(row);
+            }
+            return data;
+        }
+
+        function displayData(frequencyVar,object) {
+            const outputDiv = document.getElementById('output');
+
+            // Esempio di visualizzazione dei risultati in una tabella HTML
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Aggiungi intestazione
+            const headerRow = document.createElement('tr');
+            const headers = [object, 'Absolute Frequency', 'Relative Frequency', 'Percentage'];
+
+            for (const header of headers) {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            }
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            let sumVar = Array.from(frequencyVar.values()).reduce((acc, value) => acc + value, 0);
+
+            // Aggiungi dati
+            for (const [key, value] of frequencyVar) {
+                const row = document.createElement('tr');
+                const columns = [key, value, (value / sumVar), ((value / sumVar) * 100)];
+
+                for (const column of columns) {
+                    const td = document.createElement('td');
+                    td.textContent = column;
+                    row.appendChild(td);
+                }
+
+                tbody.appendChild(row);
+            }
+
+            table.appendChild(tbody);
+            outputDiv.appendChild(table);
+        }
+        
+
+        function processing(matrix) {
+        
+            const numStatPoints = matrix.length - 1;
+
+            const var1 = 8; // indice variabile qualitativa "Team leader or player?"
+            const var2 = 4; // indice variabile quantitativa discreta "Hard Worker"
+            const var3 = 18; // indice variabile quantitativa continua "Height"
+
+            const datasetVar1 = new Array(numStatPoints);
+            const datasetVar2 = new Array(numStatPoints);
+            const datasetVar3 = new Array(numStatPoints);
+
+            const frequencyVar1 = new Map();
+            const frequencyVar2 = new Map();
+            const frequencyVar3 = new Map();
+
+            for (let i = 1; i < matrix.length; i++) {
+                const statPoint = matrix[i];
+                datasetVar1[i - 1] = statPoint[var1];
+                datasetVar2[i - 1] = statPoint[var2];
+                datasetVar3[i - 1] = statPoint[var3];
+            }
+
+            for (let i = 0; i < numStatPoints; i++) {
+                let key = datasetVar1[i].toLowerCase().trim();
+                if (key.includes('player')) {
+                    key = 'player';
+                } else if (key.includes('leader')) {
+                    key = 'leader';
+                } else {
+                    continue;
+                }
+                if (frequencyVar1.has(key)) {
+                    frequencyVar1.set(key, frequencyVar1.get(key) + 1);
+                } else {
+                    frequencyVar1.set(key, 1);
+                }
+            }
+
+            for (let i = 0; i < numStatPoints; i++) {
+               let key = datasetVar2[i].trim();
+                if (frequencyVar2.has(key)) {
+                    frequencyVar2.set(key, frequencyVar2.get(key) + 1);
+                } else {
+                    frequencyVar2.set(key, 1);
+                }
+            }
+
+            //VAR3 QUANTITATIVA CONTINUA
+            let max = Number.MIN_VALUE;
+            let min = Number.MAX_VALUE;
+            let listHeights = [];
+
+            for (let i = 0; i < numStatPoints; i++) {
+                let key = datasetVar3[i].trim();
+                let altezza = parseFloat(key);
+                if (!isNaN(altezza) && altezza < 3) {//ho inserito altezza > 3 perche é presente un dato contenente 180 che rende gli intervalli giganteschi
+                    if (altezza > max) max = altezza;
+                    if (altezza < min) min = altezza;
+                    listHeights.push(altezza);
+                }
+            }
+
+            let k = 10;
+            let larghezzaIntervallo = parseFloat(((max - min) / k).toFixed(3));
+    
+            for (let i = 0; i <= k; i++) {
+                frequencyVar3.set(i, 0);
+            }
+
+            for (const height of listHeights) {
+                let indiceSottoIntervallo = Math.floor((height - min) / larghezzaIntervallo);
+                frequencyVar3.set(indiceSottoIntervallo, frequencyVar3.get(indiceSottoIntervallo) + 1);
+            }
+
+            //JOINT DISTRIBUTION
+            const num_variables = 2;
+            const variables = new Array(num_variables);
+            variables[0] = 'Team leader or Team player ?';
+            variables[1] = 'Hard Worker (0-5)';
+            const frequence_joint_distr = frequence_joint(matrix, num_variables, variables);
+
+
+            return [frequencyVar1,frequencyVar2,frequencyVar3,frequence_joint_distr]
+        }
+
+
+        function frequence_joint(dataset, numVarSelected, variablesSelected) {
+            const indexesVarSelected = new Array(numVarSelected);
+            const cols = dataset[0].length;
+            const rows = dataset.length;
+            const output = new Map();
+            let cont = 0;
+
+            for (let i = 0; i < cols; i++) {
+                if (variablesSelected.includes(dataset[0][i])) {
+                    indexesVarSelected[cont] = i;
+                    cont++;
+                }
+            }
+
+            for (let i = 1; i < rows; i++) {
+                const elemento = new Array(numVarSelected);
+                for (let j = 0; j < numVarSelected; j++) {
+                    elemento[j] = dataset[i][indexesVarSelected[j]].toLowerCase().trim();
+                }
+                let key = dataset[0][indexesVarSelected[0]] + ':' + elemento[0];
+                for (let j = 1; j < numVarSelected; j++) {
+                    key = key + ' and ' + indexesVarSelected[j] + ':' + elemento[j];
+                }
+                if (output.has(key)) {
+                    output.set(key, output.get(key) + 1);
+                } else {
+                    output.set(key, 1);
+                }
+            }
+
+        return output;
+    }
+
+    </script>
+</body>
+</html>

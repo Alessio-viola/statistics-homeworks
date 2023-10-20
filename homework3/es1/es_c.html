@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simulazione Tracciamento Sicurezza</title>
+  <style>
+    #attackChartContainer {
+      position: relative;
+    }
+
+    #attackChart {
+      border: 1px solid #000;
+    }
+
+    #switchMode {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    var attackChart;
+    var isBySystem = true; // Flag per tenere traccia della modalità
+
+    function generateAttackData() {
+      var M = 5; // Numero di sistemi
+      var N = 10; // Numero di giorni
+      var p = 0.2; // Probabilità di attacco
+
+      var attackData = {
+        labels: [],
+        datasets: []
+      };
+
+      for (var i = 1; i <= N; i++) {
+        attackData.labels.push("Day " + i);
+
+        for (var j = 0; j < M; j++) {
+          if (i === 1) {
+            attackData.datasets.push({
+              label: "System " + (j + 1),
+              data: [],
+              backgroundColor: getRandomColor()
+            });
+          }
+
+          var cumulativeAttacks = (attackData.datasets[j].data[i - 2] || 0) + (Math.random() < p ? 1 : 0);
+          attackData.datasets[j].data.push(cumulativeAttacks);
+        }
+      }
+
+      return attackData;
+    }
+
+    function getRandomColor() {
+      var letters = "0123456789ABCDEF";
+      var color = "#";
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    function toggleMode() {
+      isBySystem = !isBySystem;
+      updateChart();
+    }
+
+    function updateChart() {
+      if (attackChart) {
+        attackChart.destroy();
+      }
+
+      var data = generateAttackData();
+
+      if (isBySystem) {
+        attackChart = new Chart(document.getElementById("attackChart").getContext("2d"), {
+          type: "line",
+          data: data,
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      } else {
+        attackChart = new Chart(document.getElementById("attackChart").getContext("2d"), {
+          type: "bar",
+          data: data,
+          options: {
+            scales: {
+              x: {
+                stacked: true
+              },
+              y: {
+                stacked: true
+              }
+            }
+          }
+        });
+      }
+    }
+
+    window.onload = function() {
+      var attackChartContainer = document.getElementById("attackChartContainer");
+      attackChartContainer.style.width = "800px"; // Imposta una larghezza iniziale al container
+
+      updateChart(); // Crea il grafico iniziale
+
+      // Ridisegna il grafico quando il container viene ridimensionato
+      window.addEventListener('resize', function() {
+        updateChart();
+      });
+    }
+  </script>
+</head>
+<body>
+  <h1>Simulazione Tracciamento Sicurezza</h1>
+  <div id="attackChartContainer">
+    <canvas id="attackChart" width="800" height="400"></canvas>
+  </div>
+  <div id="switchMode" onclick="toggleMode()">Cambia Modalità</div>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Data Structures in JavaScript</title>
+</head>
+
+<body>
+    <script>
+        class ArrayStructure {
+    constructor() {
+        this.data = [];
+    }
+
+    loop() {
+        for (const item of this.data) {
+            console.log(item);
+        }
+    }
+
+    get(index) {
+        return this.data[index];
+    }
+
+    checkExistence(value) {
+        return this.data.includes(value);
+    }
+}
+
+class ListStructure {
+    constructor() {
+        this.data = [];
+    }
+
+    loop() {
+        for (const item of this.data) {
+            console.log(item);
+        }
+    }
+
+    add(value) {
+        this.data.push(value);
+    }
+
+    remove(value) {
+        const indexToRemove = this.data.indexOf(value);
+        if (indexToRemove !== -1) {
+            this.data.splice(indexToRemove, 1);
+        }
+    }
+
+    get(index) {
+        return this.data[index];
+    }
+
+    checkExistence(value) {
+        return this.data.includes(value);
+    }
+}
+
+class DictionaryStructure {
+    constructor() {
+        this.data = {};
+    }
+
+    loop() {
+        for (const key in this.data) {
+            console.log(key + ": " + this.data[key]);
+            if (this.data[key] === 1) break;
+        }
+    }
+
+    add(key, value) {
+        this.data[key] = value;
+    }
+
+    remove(key) {
+        delete this.data[key];
+    }
+
+    get(key) {
+        return this.data[key];
+    }
+
+    checkExistence(key) {
+        return key in this.data;
+    }
+}
+
+class SortedListStructure {
+    constructor() {
+        this.data = [];
+    }
+
+    loop() {
+        for (const entry of this.data) {
+            console.log(entry.key + ": " + entry.value);
+        }
+    }
+
+    add(key, value) {
+        this.data.push({ key, value });
+        this.data.sort((a, b) => a.key - b.key);
+    }
+
+    remove(key) {
+        const indexToRemove = this.data.findIndex(entry => entry.key === key);
+        if (indexToRemove !== -1) {
+            this.data.splice(indexToRemove, 1);
+        }
+    }
+
+    get(key) {
+        const entry = this.data.find(entry => entry.key === key);
+        return entry ? entry.value : undefined;
+    }
+
+    checkExistence(key) {
+        return this.data.some(entry => entry.key === key);
+    }
+}
+
+class HashSetStructure {
+    constructor() {
+        this.data = new Set();
+    }
+
+    loop() {
+        for (const item of this.data) {
+            console.log(item);
+        }
+    }
+
+    add(value) {
+        this.data.add(value);
+    }
+
+    remove(value) {
+        this.data.delete(value);
+    }
+
+    checkExistence(value) {
+        return this.data.has(value);
+    }
+}
+
+class SortedSet {
+    constructor() {
+        this.data = [];
+    }
+
+    add(value) {
+        if (!this.has(value)) {
+            this.data.push(value);
+            this.data.sort();
+        }
+    }
+
+    delete(value) {
+        const index = this.data.indexOf(value);
+        if (index !== -1) {
+            this.data.splice(index, 1);
+        }
+    }
+
+    has(value) {
+        return this.data.includes(value);
+    }
+
+    values() {
+        return this.data;
+    }
+
+    get(index) {
+        if (index >= 0 && index < this.data.length) {
+            return this.data[index];
+        }
+        return undefined;
+    }
+
+    set(index, value) {
+        if (index >= 0 && index < this.data.length) {
+            this.data[index] = value;
+            this.data.sort();
+        }
+    }
+}
+
+
+class QueueStructure {
+    constructor() {
+        this.data = [];
+    }
+
+    loop() {
+        while (this.data.length > 0) {
+            const item = this.data.shift();
+            console.log(item);
+        }
+    }
+
+    enqueue(item) {
+        this.data.push(item);
+    }
+
+    dequeue() {
+        return this.data.shift();
+    }
+}
+
+class StackStructure {
+    constructor() {
+        this.data = [];
+    }
+
+    loop() {
+        while (this.data.length > 0) {
+            const item = this.data.pop();
+            console.log(item);
+        }
+    }
+
+    push(item) {
+        this.data.push(item);
+    }
+
+    pop() {
+        return this.data.pop();
+    }
+}
+
+class LinkedListStructure {
+    constructor() {
+        this.data = [];
+    }
+
+    loop() {
+        for (const item of this.data) {
+            console.log(item);
+        }
+    }
+
+    addLast(value) {
+        this.data.push(value);
+    }
+
+    addAfter(node, value) {
+        const index = this.data.indexOf(node);
+        if (index !== -1) {
+            this.data.splice(index + 1, 0, value);
+        }
+    }
+
+    remove(value) {
+        const indexToRemove = this.data.indexOf(value);
+        if (indexToRemove !== -1) {
+            this.data.splice(indexToRemove, 1);
+        }
+    }
+
+    get(index) {
+        if (index >= 0 && index < this.data.length) {
+            return this.data[index];
+        } else {
+            return undefined; // Restituisci undefined se l'indice non è valido
+        }
+    }
+
+    set(index, value) {
+        if (index >= 0 && index < this.data.length) {
+            this.data[index] = value;
+        }
+    }
+}
+
+// Esempio di utilizzo
+const myArray = new ArrayStructure();
+myArray.data = [1, 2, 3, 4, 5];
+myArray.loop();
+const valueAtIndex = myArray.get(2);
+console.log("Valore nell'Array all'indice 2: " + valueAtIndex);
+const contieneValore = myArray.checkExistence(3);
+console.log("L'Array contiene 3: " + contieneValore);
+const myList = new LinkedListStructure();
+myList.addLast(10);
+myList.addLast(20);
+myList.addLast(30);
+
+console.log(myList.get(1)); // Restituirà 20
+myList.set(1, 25); // Imposta il secondo elemento a 25
+myList.loop(); // Stampa 10, 25, 30
+
+    </script>
+</body>
+
+</html>

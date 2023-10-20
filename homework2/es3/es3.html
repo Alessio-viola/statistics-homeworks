@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generazione di Variabili Casuali</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Generazione di Variabili Casuali</h1>
+    <p>Inserisci il valore di N (numero di variabili casuali) e k (numero di intervalli):</p>
+    <input type="number" id="N" placeholder="N">
+    <input type="number" id="k" placeholder="k">
+    <button onclick="generateRandomVariables()">Genera e Analizza</button>
+
+    <div id="output"></div>
+    <canvas id="myChart" width="400" height="200"></canvas>
+
+
+    <script>
+        function generateRandomVariables() {
+            const N = parseInt(document.getElementById('N').value);
+            const k = parseInt(document.getElementById('k').value);
+
+            const frequency = new Array(k).fill(0);
+
+            for (let i = 0; i < N; i++) {
+                const value = Math.random(); // Genera un numero casuale in [0, 1)
+                const interval = Math.floor(value * k);
+                frequency[interval]++;
+            }
+
+            const lowerBounds = [];
+            const upperBounds = [];
+            const data = [];
+
+            for (let i = 0; i < k; i++) {
+                const lowerBound = i / k;
+                const upperBound = (i + 1) / k;
+                lowerBounds.push(lowerBound.toFixed(2));
+                upperBounds.push(upperBound.toFixed(2));
+                data.push(frequency[i]);
+            }
+
+            // Seleziona il canvas element
+            const ctx = document.getElementById('myChart').getContext('2d');
+
+            // Crea un grafico a barre
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: lowerBounds.map((lb, i) => `[${lb}, ${upperBounds[i]})`),
+                    datasets: [{
+                        label: 'Frequenza',
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+                    }
+    </script>
+</body>
+</html>

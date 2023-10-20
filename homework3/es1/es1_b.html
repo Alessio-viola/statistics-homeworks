@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Distribuzioni di Penetrazione</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Distribuzioni di Penetrazione</h1>
+
+  <label for="numSystems">Numero di sistemi (M):</label>
+  <input type="number" id="numSystems" value="10">
+
+  <label for="numAttacks">Numero di attacchi (N):</label>
+  <input type="number" id="numAttacks" value="50">
+
+  <label for="penetrationProbability">Probabilità di penetrazione (p):</label>
+  <input type="number" step="0.01" id="penetrationProbability" value="0.1">
+
+  <button onclick="simulaDistribuzioni()">Simula</button>
+
+  <label for="startingDay">Giorno/Attacco di Inizio:</label>
+  <input type="number" id="startingDay" value="0">
+
+  <div id="cumulativeChartContainer" class="resizable-frame"></div>
+  <div id="relativeFrequencyChartContainer" class="resizable-frame"></div>
+  <div id="normalizedRatioChartContainer" class="resizable-frame"></div>
+
+  <script>
+    const M = 10;
+    const N = 50;
+    const p = 0.1;
+
+    const frameElements = document.querySelectorAll('.resizable-frame');
+
+    function initResizableFrames() {
+      frameElements.forEach((frame) => {
+        frame.addEventListener('mousedown', (e) => {
+          const startX = e.clientX;
+          const startWidth = frame.clientWidth;
+
+          function resize(e) {
+            const newWidth = startWidth + (e.clientX - startX);
+            frame.style.width = newWidth + 'px';
+          }
+
+          document.addEventListener('mousemove', resize);
+          document.addEventListener('mouseup', () => {
+            document.removeEventListener('mousemove', resize);
+          });
+        });
+      });
+    }
+
+    function calculateDistributions(startingDay) {
+      const cumulativeData = [];
+      const relativeFrequencyData = [];
+      const normalizedRatioData = [];
+
+      let cumulativePenetration = 0;
+
+      for (let day = startingDay; day < N; day++) {
+        let penetrations = 0;
+
+        for (let system = 0; system < M; system++) {
+          const random = Math.random();
+          if (random <= p) {
+            penetrations += 1;
+          }
+        }
+
+        cumulativePenetration += penetrations;
+        const relativeFrequency = cumulativePenetration / (day + 1);
+        const normalizedRatio = cumulativePenetration / Math.sqrt(day + 1);
+
+        cumulativeData.push(cumulativePenetration);
+        relativeFrequencyData.push(relativeFrequency);
+        normalizedRatioData.push(normalizedRatio);
+      }
+
+      return {
+        cumulativeData,
+        relativeFrequencyData,
+        normalizedRatioData,
+      };
+    }
+
+    function simulaDistribuzioni() {
+      const startingDay = parseInt(document.getElementById('startingDay').value);
+      if (isNaN(startingDay) || startingDay < 0 || startingDay >= N) {
+        alert('Inserisci un giorno/attacco di inizio valido.');
+        return;
+      }
+
+      const { cumulativeData, relativeFrequencyData, normalizedRatioData } = calculateDistributions(startingDay);
+
+      // Visualizza i grafici
+      visualizzaGrafico('cumulativeChartContainer', cumulativeData, 'Cumulative Penetration');
+      visualizzaGrafico('relativeFrequencyChartContainer', relativeFrequencyData, 'Relative Frequency');
+      visualizzaGrafico('normalizedRatioChartContainer', normalizedRatioData, 'Normalized Ratio');
+    }
+
+    function visualizzaGrafico(containerId, data, label) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '<canvas></canvas>';
+
+      const canvas = container.querySelector('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+
+      new Chart(context, {
+        type: 'bar',
+        data: {
+          labels: data.map((_, index) => (index + 1).toString()),
+          datasets: [{
+            label: label,
+            data: data,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+              title: {
+                display: true,
+                text: 'Giorno/Attacco',
+              },
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Valore',
+              },
+            },
+          },
+        },
+      });
+    }
+
+    initResizableFrames();
+  </script>
+</body>
+</html>
