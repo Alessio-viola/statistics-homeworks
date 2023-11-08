@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grafico Cartesiano con Numeri</title>
+    <style>
+        #resizableRect {
+            position: relative;
+            width: 400px;
+            height: 300px;
+            background-color: lightblue;
+            resize: both;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Simulazione Tracciamento Sicurezza</h1>
+    <p>Inserisci i valori:</p>
+    <label for="numSystems">Numero di sistemi (N):</label>
+    <input type="number" id="numSystems" value="5"><br>
+    <label for="numAttacks">Numero di attacchi (M):</label>
+    <input type="number" id="numAttacks" value="10"><br>
+    <label for="attackProbability">Probabilità di successo di un attacco (p):</label>
+    <input type="number" step="0.01" id="attackProbability" value="0.5"><br>
+    <label for="plotDay">Giorno/Attacco (x):</label>
+    <input type="number" id="plotDay" value="5"><br>
+    <button id="simulazione">Simula</button>
+
+    <div id="resizableRect">
+        <canvas id="securityChart" width="400" height="300"></canvas>
+        <canvas id="cumulatedChart" ></canvas>
+        <canvas id="relativeChart" ></canvas>
+        <canvas id="normalizedChart"></canvas>
+    </div>
+    <script>
+        
+        //const bufferCanvas = document.createElement('canvas');
+        //const bufferContext = bufferCanvas.getContext('2d');
+
+        class My2dUtilities {
+            constructor(canvasId,cumul_canv,relat_canv,norm_canv) {
+                this.canvas = document.getElementById(canvasId);
+                this.context = this.canvas.getContext('2d');
+                this.cumul_canv = document.getElementById(cumul_canv);
+                this.context_cumul = this.cumul_canv.getContext('2d');
+                this.relat_canv = document.getElementById(relat_canv);
+                this.context_relat = this.relat_canv.getContext('2d');
+                this.norm_canv = document.getElementById(norm_canv);
+                this.context_norm = this.norm_canv.getContext('2d');
+            }
+
+            clearCanvas() {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            drawRectangle(x, y, width, height, color) {
+                this.context.fillStyle = color;
+                this.context.fillRect(x, y, width, height);
+            }
+
+            drawCircle(x, y, radius, color) {
+                this.context.fillStyle = color;
+                this.context.beginPath();
+                this.context.arc(x, y, radius, 0, 2 * Math.PI);
+                this.context.fill();
+            }
+
+            drawText(text, x, y, font, color) {
+                this.context.fillStyle = color;
+                this.context.font = font;
+                this.context.fillText(text, x, y);
+            }
+
+            createCartesianGraph(xAxisLabel, yAxisLabel, xMin, xMax, yMin, yMax) {
+                const ctx = this.context;
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+                const xAxisSpacing = 5; // Spaziatura per le ascisse
+                const yAxisSpacing = 5; // Spaziatura per le ordinate
+
+                // Disegna assi
+                ctx.beginPath();
+                ctx.moveTo(0, canvasHeight / 2);
+                ctx.lineTo(canvasWidth, canvasHeight / 2);
+                ctx.moveTo(canvasWidth / 2, 0);
+                ctx.lineTo(canvasWidth / 2, canvasHeight);
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Etichette sugli assi
+                ctx.font = '12px Arial';
+                ctx.fillStyle = 'black';
+                ctx.textAlign = 'center';
+                ctx.fillText(xAxisLabel, canvasWidth - 10, canvasHeight / 2 - 10);
+                ctx.fillText(yAxisLabel, canvasWidth / 2 + 10, 10);
+
+                // Calcola scaling
+                const xScale = canvasWidth / (xMax - xMin);
+                const yScale = canvasHeight / (yMax - yMin);
+
+                // Disegna numeri sulle ascisse
+                for (let x = xMin; x <= xMax; x++) {
+                    const xCoord = x * xScale + canvasWidth / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(xCoord, canvasHeight / 2 - xAxisSpacing / 2);
+                    ctx.lineTo(xCoord, canvasHeight / 2 + xAxisSpacing / 2);
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillText(x.toString(), xCoord, canvasHeight / 2 + xAxisSpacing);
+                }
+
+                // Disegna numeri sulle ordinate
+                for (let y = yMin; y <= yMax; y++) {
+                    const yCoord = canvasHeight / 2 - y * yScale;
+                    ctx.beginPath();
+                    ctx.moveTo(canvasWidth / 2 - yAxisSpacing / 2, yCoord);
+                    ctx.lineTo(canvasWidth / 2 + yAxisSpacing / 2, yCoord);
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillText(y.toString(), canvasWidth / 2 - yAxisSpacing, yCoord);
+                }
+
+                return { xScale, yScale, xMin, yMin };
+            }
+
+            updateCanvasSize() {
+                console.log("resize")
+                
+                this.canvas.width = parseFloat(getComputedStyle(this.canvas).width);
+                this.canvas.height = parseFloat(getComputedStyle(this.canvas).height);
+                //this.restoreMainCanvasContext()
+            }
+
+            
+
+        }
+
+        class ResizableRectangle {
+            constructor(rectangle, canvas) {
+                this.rectangle = rectangle;
+                this.canvas = canvas;
+                this.canvasUtilities = utilities;
+                this.canvasUtilities.clearCanvas();
+                this.canvasUtilities.createCartesianGraph('X', 'Y', -10, 10, -20, 20);
+                this.attachListeners();
+            }
+
+            attachListeners() {
+                this.rectangle.addEventListener('mousedown', (e) => {
+                    this.startResize(e);
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    this.resize(e);
+                });
+
+                window.addEventListener('mouseup', () => {
+                    this.stopResize();
+                });
+            }
+
+            startResize(e) {
+                this.resizing = true;
+                this.canvasUtilities.saveMainCanvasContext()
+                this.initialX = e.clientX;
+                this.initialY = e.clientY;
+            }
+
+            resize(e) {
+                if (!this.resizing) return;
+                const deltaX = e.clientX - this.initialX;
+                const deltaY = e.clientY - this.initialY;
+
+                const newWidth = this.rectangle.offsetWidth + deltaX;
+                const newHeight = this.rectangle.offsetHeight + deltaY;
+
+                this.rectangle.style.width = `${newWidth}px`;
+                this.rectangle.style.height = `${newHeight}px`;
+
+                // Resize the canvas to match the new rectangle size
+                this.canvas.width = newWidth;
+                this.canvas.height = newHeight;
+
+                this.canvasUtilities.restoreMainCanvasContext()
+                this.initialX = e.clientX;
+                this.initialY = e.clientY;
+
+                this.canvasUtilities.updateCanvasSize();
+            }
+
+            stopResize() {
+                this.resizing = false;
+                simulateSecurityTrajectories(this.canvasUtilities); // Correzione qui
+            }
+        }
+
+    function simulateSecurityTrajectories(canvasUtilities) {
+        canvasUtilities.clearCanvas()
+        var N = parseInt(document.getElementById("numSystems").value);
+        var M = parseInt(document.getElementById("numAttacks").value);
+        var p = parseFloat(document.getElementById("attackProbability").value);
+        var G = parseInt(document.getElementById("plotDay").value);
+
+        canvasUtilities.createCartesianGraph('X', 'Y', -M, M, -M, M);
+
+        var colors = ["#ff5733", "#33ff57", "#3366ff", "#ff3366", "#66ff33"]; // Colors for systems
+
+        // Draw X-axis (attacks)
+        canvasUtilities.context.beginPath();
+        canvasUtilities.context.moveTo(0, canvasUtilities.canvas.height / 2);
+        canvasUtilities.context.lineTo(canvasUtilities.canvas.width, canvasUtilities.canvas.height / 2);
+        canvasUtilities.context.strokeStyle = 'black';
+        canvasUtilities.context.lineWidth = 2;
+        canvasUtilities.context.stroke();
+
+        // Draw Y-axis (score)
+        canvasUtilities.context.beginPath();
+        canvasUtilities.context.moveTo(canvasUtilities.canvas.width / 2, 0);
+        canvasUtilities.context.lineTo(canvasUtilities.canvas.width / 2, canvasUtilities.canvas.height);
+        canvasUtilities.context.strokeStyle = 'black';
+        canvasUtilities.context.lineWidth = 2;
+        canvasUtilities.context.stroke();
+
+        // Labels for X-axis
+        canvasUtilities.drawText("Attacks", canvasUtilities.canvas.width - 10, canvasUtilities.canvas.height / 2 - 10, '12px Arial', 'black');
+
+        // Labels for Y-axis
+        canvasUtilities.drawText("Security Score", canvasUtilities.canvas.width / 2 + 10, 10, '12px Arial', 'black');
+
+        // Simulate security trajectories for all systems
+        for (var systemIndex = 0; systemIndex < N; systemIndex++) {
+        var xScale = canvasUtilities.canvas.width / (2*M); 
+        var yScale = canvasUtilities.canvas.height /(2*M) ; 
+
+        var xCoord = canvasUtilities.canvas.width / 2; // Parti dall'origine X
+        var yCoord = canvasUtilities.canvas.height / 2; // Parti dall'origine Y
+
+        canvasUtilities.context.beginPath();
+        canvasUtilities.context.strokeStyle = colors[systemIndex % colors.length];
+        canvasUtilities.context.lineWidth = 2;
+        canvasUtilities.context.moveTo(xCoord, yCoord);
+
+        for (var attackIndex = 0; attackIndex < M; attackIndex++) {
+            xCoord += xScale; // Sposta lungo l'asse X
+            // Simulate the security score based on the penetration probability
+            var score = Math.random() <= p ? -1 : 1;
+            yCoord -= score * yScale; // Sottrai il punteggio invece di aggiungerlo
+
+            // Draw a line segment for this score
+            canvasUtilities.context.lineTo(xCoord, yCoord);
+        }
+
+        canvasUtilities.context.stroke();
+        }
+
+    }
+
+
+    const canvasUtilities = new My2dUtilities('securityChart');
+    const resizableRectangle = new ResizableRectangle(
+        document.getElementById('resizableRect'),
+        document.getElementById('securityChart'),
+        canvasUtilities
+    );
+    
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aggiungi un listener al bottone con ID "simulazione"
+        var simulazioneButton = document.getElementById('simulazione');
+        simulazioneButton.addEventListener('click', function() {
+            simulateSecurityTrajectories(canvasUtilities);
+        });
+    });
+
+    </script>
+</body>
+</html>

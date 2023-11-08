@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Security Score Simulation</title>
+    </head>
+
+    <body>
+        <h3>Simulation of Security Score Trajectories</h3>
+        <div>
+          <label for="numSystemsInput">Number of Systems (M): </label>
+          <input type="number" id="numSystemsInput" min="1" value="10">
+        </div>
+        <div>
+          <label for="numAttacksInput">Number of Attacks (N): </label>
+          <input type="number" id="numAttacksInput" min="1" value="50">
+        </div>
+        <div>
+          <label for="successProbabilityInput">Success Probability of Attacks: </label>
+          <input type="number" id="successProbabilityInput" min="0" max="1" step="0.01" value="0.3">
+        </div>
+        <button id="startSimulationButton">Start Simulation</button>
+        <div>
+          <canvas id="myCanvas" width="800" height="400"></canvas>
+        </div>
+        
+    </body>
+    <script>
+
+        // settings for the ResizeableRectangle itself
+        class ResizeableRectangleSettings {
+            constructor(p, systems, attacks) {
+                this.p = parseFloat(p);
+                this.systems = parseInt(systems);
+                this.attacks = parseInt(attacks);
+            }
+        }
+        
+        // more generalized settings for the UI
+        class UISettings {
+            constructor(fillColor, border, borderWidth) {
+                this.fill = fillColor;
+                this.border = border;
+                this.borderWidth = borderWidth;
+            }
+        }
+        
+        // the star of the party
+        class ResizeableRectangle {
+            constructor(canvas, size, UISettings, settings, attacks) {
+                this.canvas = canvas;
+                this.size = size;
+                this.UISettings = UISettings;
+                this.settings = settings;
+                this.attacks = attacks;
+            }
+        }
+        
+        // simulator class to compact the canvas and every element inside
+        class Simulator {
+            constructor(canvas) {
+                this.canvas = document.getElementById(canvas);
+                this.objects = [];
+            }
+        
+            initObjects(graphs) {
+                this.objects.push(...graphs);
+            }
+        }
+        
+        // simulate attacks.length attacks in a single system 
+        function simulateAttacks(attacks) {
+            var x = 0;
+            var score = 1;
+            this.context.strokeStyle = attacks[0]['color']
+            var nAttacks = attacks.length - 1
+        
+            var baseY = this.rect.y + this.rect.height / 2
+            let baseX = this.rect.x
+            let currentAttack = 0
+        
+            for (let i = attacks.length; i > 0; i--) {
+                currentAttack++
+        
+                this.context.beginPath();
+                if (this.mode === "NormalizedFreq") 
+                { 
+                    this.context.lineTo(baseX + x, baseY + (this.rect.height/(this.nSys/10) / nAttacks) * (-score));
+                }
+                else this.context.moveTo(baseX + x, baseY + (this.rect.height/2  / nAttacks) * -score);
+        
+                if (!attacks[i]) 
+                {
+                    if (this.mode === "Freq") score--
+                } 
+                else
+                {
+                    if (this.mode === "RelativeFreq") score += (this.realAttackCounter(attacks,currentAttack)) / currentAttack;
+                    else if (this.mode === "NormalizedFreq") { score += this.realAttackCounter(attacks,currentAttack) / Math.sqrt(currentAttack) }
+                    else score++
+                }
+                x = (attacks.length - i) * (this.rect.width / (nAttacks));
+        
+                if (this.mode === "NormalizedFreq") 
+                {
+                    this.context.lineTo(baseX + x, baseY + (this.rect.height/(this.nSys/10) / nAttacks) * (-score));
+                }
+                else
+                {
+                    this.context.lineTo(baseX + x, baseY + (this.rect.height/2 / nAttacks) * (-score));
+                }
+                    
+                this.context.stroke();
+                if (Math.floor(nAttacks / 2) == i) { attacks[0]['middle'] = (score) }
+            }
+            attacks[0]['final'] = (score)
+        }
+
+        // initialize everything that we need
+        const simulator = new Simulator("myCanvas");
+        const resizeableRectangleSettings = new ResizeableRectangleSettings(document.getElementById("successProbabilityInput").value, document.getElementById("numSystemsInput").value, document.getElementById("numAttacksInput").value);
+        let UISetting = new UISettings("#cccccc", "#000000", 2);
+        
+        // create every ResizeableRectangle accordingly
+        const graphPlusMinus = new ResizeableRectangle(simulator.canvas, { width: 600, height: 400, x: 100, y: 80 }, UISetting, { ...resizeableRectangleSettings, mode: "PlusMinus" }, attacks);
+        const graphFreq = new ResizeableRectangle(simulator.canvas, { width: 600, height: 400, x: 700, y: 80 }, { ...resizeableRectangleSettings, label: "Absolute Frequency" }, { ...UISetting, mode: "Freq" }, attacks);
+        const graphRelativeFreq = new ResizeableRectangle(simulator.canvas, { width: 600, height: 400, x: 100, y: 500}, { ...resizeableRectangleSettings, label: "Relative Frequency" }, { ...UISetting, mode: "RelativeFreq" }, attacks);
+        const graphNormalizedFreq = new ResizeableRectangle(simulator.canvas, { width: 600, height: 400, x: 700, y: 500 }, { ...resizeableRectangleSettings, label: "Normalized Frequency" }, { ...UISetting, mode: "NormalizedFreq" }, attacks);
+        
+        // add everything and we are ready to go!
+        simulator.initObjects([graph1, graph2, graph3, graph4]);
+
+    </script>
+</html>

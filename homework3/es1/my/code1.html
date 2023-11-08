@@ -56,10 +56,14 @@
 
     <script>
 
+        const colors = ["#ff5733", "#33ff57", "#3366ff", "#ff3366", "#66ff33"];
+
+
         class My2dUtilities {
             constructor(canvasId) {
                 this.canvas = document.getElementById(canvasId);
                 this.context = this.canvas.getContext('2d');
+                this.data = {}
             }
 
             clearCanvas() {
@@ -139,6 +143,55 @@
                 return { xScale, yScale, xMin, yMin };
             }
 
+            simulateSecurityTrajectories() {
+            
+            this.clearCanvas()
+            var N = parseInt(document.getElementById("numSystems").value);
+            var M = parseInt(document.getElementById("numAttacks").value);
+            var p = parseFloat(document.getElementById("attackProbability").value);
+            var startPoint = parseInt(document.getElementById("startPoint").value);
+
+            this.createCartesianGraph('X', 'Y', startPoint, M, -M, M);
+
+            const successfulAttacks = new Array(M).fill(0); // Array per tenere traccia delle penetrazioni riuscite
+
+            for (let systemIndex = 0; systemIndex < N; systemIndex++) {
+                
+                this.data[systemIndex] = [];//dizionario di liste
+
+                const xScale = this.canvas.width / (M - startPoint);
+                const yScale = this.canvas.height / (2 * (M-startPoint));
+
+                let xCoord = (startPoint) * xScale + this.canvas.width / 2;
+                let yCoord = this.canvas.height / 2;
+
+                this.context.beginPath();
+                this.context.strokeStyle = colors[systemIndex % colors.length];
+                this.context.lineWidth = 2;
+                this.context.moveTo(xCoord, yCoord);
+
+                for (let attackIndex = startPoint; attackIndex < M; attackIndex++) {
+
+                    xCoord += xScale; // Sposta lungo l'asse X
+                    // Simula il punteggio di sicurezza basato sulla probabilità di penetrazione
+                    const score = Math.random() <= p ? -1 : 1;
+                    yCoord -= score * yScale; // Sottrai il punteggio invece di aggiungerlo
+
+                    if (score === 1) {
+                        // Incrementa il conteggio delle penetrazioni riuscite
+                        this.data[systemIndex][attackIndex] = 1;
+                    }else{
+                        this.data[systemIndex][attackIndex] = 0;
+                    }
+
+                    // Disegna un segmento di linea per questo punteggio
+                    this.context.lineTo(xCoord, yCoord);
+                }
+
+                this.context.stroke();
+            }
+        }
+
             updateCanvasSize() {
                 console.log("resize")
                 
@@ -146,6 +199,45 @@
                 this.canvas.height = parseFloat(getComputedStyle(this.canvas).height);
                 //this.restoreMainCanvasContext()
             }
+
+            drawCumulativeGraph() {
+                console.log(this.data)
+                var N = parseInt(document.getElementById("numSystems").value);    
+                var M = parseInt(document.getElementById("numAttacks").value);
+                var startPoint = parseInt(document.getElementById("startPoint").value);
+                this.clearCanvas();
+                this.createCartesianGraph('Attacchi', 'Sicurezza', startPoint, M, -M, M);
+
+                // Itera sui sistemi
+                for (let systemIndex = 0; systemIndex < N; systemIndex++) {
+                    const xScale = this.canvas.width / (M - startPoint);
+                    const yScale = this.canvas.height / (2 * (M - startPoint));
+                    let xCoord = (startPoint) * xScale + this.canvas.width / 2;
+                    let yCoord = this.canvas.height / 2;
+
+                    this.context.beginPath();
+                    this.context.strokeStyle = colors[systemIndex % colors.length];
+                    this.context.lineWidth = 2;
+                    this.context.moveTo(xCoord, yCoord);
+
+                    console.log(this.data)
+
+                    // Itera sugli attacchi
+                    for (let attackIndex = startPoint; attackIndex < M; attackIndex++) {
+                        // Ottieni il valore del sistema specifico e disegnalo
+                        let value = this.data[systemIndex][attackIndex];
+                        console.log(value)
+                        xCoord += xScale;
+                        yCoord -= value * yScale;
+
+                        // Disegna un segmento di linea per questo punteggio
+                        this.context.lineTo(xCoord, yCoord);
+                    }
+                    this.context.stroke();
+                }
+            }
+
+
 
             
 
@@ -204,116 +296,7 @@
 
             stopResize() {
                 this.resizing = false;
-                simulateSecurityTrajectories(this.canvasUtilities); // Correzione qui
-            }
-        }
-
-        function simulateSecurityTrajectories(canvasUtilities) {
-            canvasUtilities.clearCanvas()
-            var N = parseInt(document.getElementById("numSystems").value);
-            var M = parseInt(document.getElementById("numAttacks").value);
-            var p = parseFloat(document.getElementById("attackProbability").value);
-            var startPoint = parseInt(document.getElementById("startPoint").value);
-
-            canvasUtilities.createCartesianGraph('X', 'Y', startPoint, M, -M, M);
-
-            const colors = ["#ff5733", "#33ff57", "#3366ff", "#ff3366", "#66ff33"];
-
-            const successfulAttacks = new Array(M).fill(0); // Array per tenere traccia delle penetrazioni riuscite
-
-            for (let systemIndex = 0; systemIndex < N; systemIndex++) {
-                const xScale = canvasUtilities.canvas.width / (M - startPoint);
-                const yScale = canvasUtilities.canvas.height / (2 * (M-startPoint));
-
-                let xCoord = (startPoint) * xScale + canvasUtilities.canvas.width / 2;
-                let yCoord = canvasUtilities.canvas.height / 2;
-
-                canvasUtilities.context.beginPath();
-                canvasUtilities.context.strokeStyle = colors[systemIndex % colors.length];
-                canvasUtilities.context.lineWidth = 2;
-                canvasUtilities.context.moveTo(xCoord, yCoord);
-
-                for (let attackIndex = startPoint; attackIndex < M; attackIndex++) {
-                    xCoord += xScale; // Sposta lungo l'asse X
-                    // Simula il punteggio di sicurezza basato sulla probabilità di penetrazione
-                    const score = Math.random() <= p ? -1 : 1;
-                    yCoord -= score * yScale; // Sottrai il punteggio invece di aggiungerlo
-
-                    if (score === 1) {
-                        // Incrementa il conteggio delle penetrazioni riuscite
-                        successfulAttacks[attackIndex]++;
-                    }
-
-                    // Disegna un segmento di linea per questo punteggio
-                    canvasUtilities.context.lineTo(xCoord, yCoord);
-                }
-
-                canvasUtilities.context.stroke();
-            }
-
-            // Calcola le metriche
-            const cumulativeFrequency = calculateCumulativeFrequency(successfulAttacks);
-            const relativeFrequency = calculateRelativeFrequency(successfulAttacks, M);
-            const normalizedRatio = calculateNormalizedRatio(cumulativeFrequency, M);
-
-            // Disegna i grafici per le metriche
-            drawGraph(canvasUtilitiesCumulative, cumulativeFrequency, startPoint);
-            drawGraph(canvasUtilitiesRelative, relativeFrequency, startPoint);
-            drawGraph(canvasUtilitiesNormalized, normalizedRatio, startPoint);
-            
-            // Disegna istogrammi verticali
-          /*  drawVerticalHistogram('cumulativeHistogram', cumulativeFrequency, startPoint);
-            drawVerticalHistogram('relativeHistogram', relativeFrequency, startPoint);
-            drawVerticalHistogram('normalizedHistogram', normalizedRatio, startPoint);
-
-          }
-        
-          function drawVerticalHistogram(containerId, data, startPoint) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-
-            const maxBarHeight = Math.max(...data);
-
-            for (let i = startPoint; i < data.length; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'histogram-bar';
-                bar.style.height = `${(data[i] / maxBarHeight) * 100}%`;
-                container.appendChild(bar);
-            }
-        }*/}
-
-        function calculateCumulativeFrequency(successfulAttacks) {
-            const cumulative = new Array(successfulAttacks.length);
-            let sum = 0;
-            for (let i = 0; i < successfulAttacks.length; i++) {
-                sum += successfulAttacks[i];
-                cumulative[i] = sum;
-            }
-            return cumulative;
-        }
-
-        function calculateRelativeFrequency(successfulAttacks, totalAttacks) {
-            return successfulAttacks.map(count => count / totalAttacks);
-        }
-
-        function calculateNormalizedRatio(cumulativeFrequency, totalAttacks) {
-            const sqrtTotalAttacks = Math.sqrt(totalAttacks);
-            return cumulativeFrequency.map(count => count / sqrtTotalAttacks);
-        }
-
-        function drawGraph(canvasUtilities, data, startPoint) {
-          var M = parseInt(document.getElementById("numAttacks").value);
-          canvasUtilities.clearCanvas()
-          canvasUtilities.createCartesianGraph('X', 'Y', startPoint, M, -M, M);
-            for (let i = startPoint; i < data.length; i++) {
-                const x = i ;
-                const y = data[i];
-                const xScale = canvasUtilities.canvas.width / (data.length - startPoint);
-                const yScale = canvasUtilities.canvas.height / (2 * Math.max(...data));
-                const xCoord = x * xScale + canvasUtilities.canvas.width / 2;
-                const yCoord = canvasUtilities.canvas.height / 2 - y * yScale;
-
-                canvasUtilities.drawCircle(xCoord, yCoord, 4, 'blue');
+                this.canvasUtilities.simulateSecurityTrajectories(); // Correzione qui
             }
         }
 
@@ -324,6 +307,10 @@
             canvasUtilities
         );
 
+        canvasUtilities.createCartesianGraph()
+        canvasUtilities.simulateSecurityTrajectories()
+
+
         const canvasUtilitiesCumulative = new My2dUtilities('cumulativeChart');
         const resizableRectangleCumulative = new ResizableRectangle(
             document.getElementById('cumulativeGraph'),
@@ -331,6 +318,8 @@
             canvasUtilitiesCumulative
         );
 
+        canvasUtilitiesCumulative.drawCumulativeGraph()
+        /*
         const canvasUtilitiesRelative = new My2dUtilities('relativeChart');
         const resizableRectangleRelative = new ResizableRectangle(
             document.getElementById('relativeGraph'),
@@ -344,11 +333,12 @@
             document.getElementById('normalizedChart'),
             canvasUtilitiesNormalized
         );
+        */
 
         document.addEventListener('DOMContentLoaded', function () {
             var simulazioneButton = document.getElementById('simulazione');
             simulazioneButton.addEventListener('click', function () {
-                simulateSecurityTrajectories(canvasUtilities);
+                canvasUtilities.simulateSecurityTrajectories();
             });
         });
       

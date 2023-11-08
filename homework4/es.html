@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parser TSV</title>
+</head>
+<body>
+    <h1>Parser TSV</h1>
+    <input type="file" id="fileInput" accept=".tsv" />
+    <div id="output"></div>
+ 
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const tsvContent = e.target.result;
+                    const data = parseTSV(tsvContent);
+                    const variableRanges = getVariableRanges(data);
+                    const jointDistribution = calculateJointDistribution(data, variableRanges);
+                    displayData(jointDistribution);
+                };
+                reader.readAsText(file);
+            }
+        });
+ 
+        function parseTSV(tsv) {
+            const lines = tsv.split('\n');
+            const data = [];
+            for (let line of lines) {
+                const row = line.split('\t');
+                data.push(row);
+            }
+            return data;
+        }
+
+        function getVariableRanges(data) {
+            const numVariables = data[0].length;
+            const variableRanges = new Array(numVariables);
+            for (let i = 0; i < numVariables; i++) {
+                variableRanges[i] = {
+                    name: data[0][i],
+                    min: Number.MAX_VALUE,
+                    max: Number.MIN_VALUE
+                };
+            }
+
+            for (let i = 1; i < data.length; i++) {
+                for (let j = 0; j < numVariables; j++) {
+                    const value = parseFloat(data[i][j]);
+                    if (!isNaN(value)) {
+                        variableRanges[j].min = Math.min(variableRanges[j].min, value);
+                        variableRanges[j].max = Math.max(variableRanges[j].max, value);
+                    }
+                }
+            }
+
+            return variableRanges;
+        }
+
+        function calculateJointDistribution(data, variableRanges) {
+            const numVariables = variableRanges.length;
+            const subdivisions = []; // Numero di suddivisioni per ciascuna variabile
+            const frequencyMap = new Map();
+
+            for (let i = 0; i < numVariables; i++) {
+                // Aggiungi il numero desiderato di suddivisioni per ciascuna variabile
+                subdivisions[i] = 10; // Puoi personalizzare il numero di suddivisioni
+            }
+
+            for (let i = 1; i < data.length; i++) {
+                const entry = data[i];
+                const key = [];
+                for (let j = 0; j < numVariables; j++) {
+                    const value = parseFloat(entry[j]);
+                    if (!isNaN(value)) {
+                        const range = variableRanges[j];
+                        const interval = (range.max - range.min) / subdivisions[j];
+                        let intervalIndex = Math.floor((value - range.min) / interval);
+                        if (intervalIndex < 0) {
+                            intervalIndex = 0;
+                        }
+                        key.push(intervalIndex);
+                    }
+                }
+
+                const keyString = key.join('-');
+                if (frequencyMap.has(keyString)) {
+                    frequencyMap.set(keyString, frequencyMap.get(keyString) + 1);
+                } else {
+                    frequencyMap.set(keyString, 1);
+                }
+            }
+
+            return frequencyMap;
+        }
+
+        function displayData(jointDistribution) {
+            const outputDiv = document.getElementById('output');
+ 
+            // Esempio di visualizzazione dei risultati in una tabella HTML
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+ 
+            // Aggiungi intestazione
+            const headerRow = document.createElement('tr');
+            const headers = ['Key', 'Frequency'];
+ 
+            for (const header of headers) {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            }
+ 
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+ 
+            // Aggiungi dati
+            for (const [key, value] of jointDistribution) {
+                const row = document.createElement('tr');
+                const columns = [key, value];
+ 
+                for (const column of columns) {
+                    const td = document.createElement('td');
+                    td.textContent = column;
+                    row.appendChild(td);
+                }
+ 
+                tbody.appendChild(row);
+            }
+ 
+            table.appendChild(tbody);
+            outputDiv.appendChild(table);
+        }
+    </script>
+</body>
+</html>

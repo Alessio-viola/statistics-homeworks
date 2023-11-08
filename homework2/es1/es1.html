@@ -5,9 +5,16 @@
 </head>
 <body>
     <h1>Parser TSV</h1>
-    <input type="file" id="fileInput" accept=".tsv" />
+    <div>
+        <label>Inserisci numero intervalli per variabile continua</label>
+        <input type="text" id="intervals">
+    </div>
+    <div>
+        <label>Inserisci file</label>
+        <input type="file" id="fileInput" accept=".tsv" />
+    </div>
     <div id="output"></div>
-
+</body>
     <script>
         document.getElementById('fileInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
@@ -148,7 +155,8 @@
                 }
             }
 
-            let k = 10;
+            let k = parseInt(document.getElementById("intervals").value);
+            console.log(k)
             let larghezzaIntervallo = parseFloat(((max - min) / k).toFixed(3));
     
             for (let i = 0; i <= k; i++) {
@@ -206,5 +214,5 @@
     }
 
     </script>
-</body>
+
 </html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Security Score Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div>
+        <label for="numSystems">Number of Systems: </label>
+        <input type="number" id="numSystems" value="5">
+    </div>
+    <div>
+        <label for="numAttacks">Number of Attacks: </label>
+        <input type="number" id="numAttacks" value="10">
+    </div>
+    <div>
+        <label for="attackProbability">Attack Success Probability (0-1): </label>
+        <input type="number" id="attackProbability" step="0.01" value="0.5">
+    </div>
+    <button id="simulateButton">Simulate</button>
+    <div>
+        <canvas id="scoreChart" width="400" height="200"></canvas>
+    </div>
+    <div>
+        <canvas id="penetrationChart" width="400" height="200"></canvas>
+    </div>
+    <div>
+        <canvas id="relativeFrequencyChart" width="400" height="200"></canvas>
+    </div>
+    <div>
+        <canvas id="normalizedRatioChart" width="400" height="200"></canvas>
+    </div>
+
+    <script>
+        const numSystemsInput = document.getElementById("numSystems");
+        const numAttacksInput = document.getElementById("numAttacks");
+        const attackProbabilityInput = document.getElementById("attackProbability");
+        const simulateButton = document.getElementById("simulateButton");
+
+        const scoreChart = document.getElementById("scoreChart").getContext("2d");
+        const penetrationChart = document.getElementById("penetrationChart").getContext("2d");
+        const relativeFrequencyChart = document.getElementById("relativeFrequencyChart").getContext("2d");
+        const normalizedRatioChart = document.getElementById("normalizedRatioChart").getContext("2d");
+
+        let numSystems, numAttacks, attackProbability;
+
+        simulateButton.addEventListener("click", () => {
+            numSystems = parseInt(numSystemsInput.value);
+            numAttacks = parseInt(numAttacksInput.value);
+            attackProbability = parseFloat(attackProbabilityInput.value);
+
+            // Simulate data and create charts
+            const days = [...Array(numAttacks + 1).keys()]; // Days or attacks array
+
+            // Simulated data for security scores, penetration, relative frequency, and normalized ratio
+            const scoreData = simulateSecurityScores(numSystems, numAttacks, attackProbability);
+            const penetrationData = calculatePenetrationFrequency(scoreData);
+            const relativeFrequencyData = calculateRelativeFrequency(penetrationData, numAttacks);
+            const normalizedRatioData = calculateNormalizedRatio(penetrationData, numAttacks);
+
+            createChart(scoreChart, "Security Scores", days, scoreData);
+            createChart(penetrationChart, "Penetration Frequency", days, penetrationData);
+            createChart(relativeFrequencyChart, "Relative Frequency", days, relativeFrequencyData);
+            createChart(normalizedRatioChart, "Normalized Ratio", days, normalizedRatioData);
+        });
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function simulateSecurityScores(numSystems, numAttacks, attackProbability) {
+            const scores = Array(numSystems).fill(0).map(() => []);
+            for (let attack = 1; attack <= numAttacks; attack++) {
+                for (let system = 0; system < numSystems; system++) {
+                    const random = Math.random();
+                    if (random <= attackProbability) {
+                        scores[system].push(1);
+                    } else {
+                        scores[system].push(-1);
+                    }
+                }
+            }
+            return scores;
+        }
+
+        function calculatePenetrationFrequency(scoreData) {
+            return scoreData.map((scores) => scores.reduce((a, b) => a + b, 0));
+        }
+
+        function calculateRelativeFrequency(penetrationData, numAttacks) {
+            return penetrationData.map((penetration) => penetration / numAttacks);
+        }
+
+        function calculateNormalizedRatio(penetrationData, numAttacks) {
+            return penetrationData.map((penetration) => penetration / Math.sqrt(numAttacks));
+        }
+
+        function createChart(ctx, label, xData, yData) {
+            const datasets = yData.map((scores, index) => ({
+                label: `System ${index + 1}`,
+                data: scores,
+                borderColor: getRandomColor(),
+                borderWidth: 1,
+                fill: false,
+            }));
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: xData,
+                    datasets: datasets,
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
