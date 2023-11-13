@@ -14,9 +14,13 @@
     <div id="output"></div>
     <canvas id="myChart" width="400" height="200"></canvas>
 
-
     <script>
+        let myChartInstance = null; // Inizializza il riferimento a null
+
         function generateRandomVariables() {
+            
+            if(myChartInstance) myChartInstance.destroy();
+
             const N = parseInt(document.getElementById('N').value);
             const k = parseInt(document.getElementById('k').value);
 
@@ -43,8 +47,8 @@
             // Seleziona il canvas element
             const ctx = document.getElementById('myChart').getContext('2d');
 
-            // Crea un grafico a barre
-            const myChart = new Chart(ctx, {
+            // Crea un nuovo grafico a barre
+            myChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: lowerBounds.map((lb, i) => `[${lb}, ${upperBounds[i]})`),
@@ -64,7 +68,7 @@
                     }
                 }
             });
-                    }
+        }
     </script>
 </body>
 </html>

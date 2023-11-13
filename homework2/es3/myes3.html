@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generazione di Variabili Casuali</title>
+</head>
+<body>
+    <h1>Generazione di Variabili Casuali</h1>
+    <p>Inserisci il valore di N (numero di variabili casuali) e k (numero di intervalli):</p>
+    <input type="number" id="N" placeholder="N">
+    <input type="number" id="k" placeholder="k">
+    <button onclick="generateRandomVariables()">Genera e Analizza</button>
+
+    <div id="output"></div>
+
+    <script>
+        function generateRandomVariables() {
+            const N = parseInt(document.getElementById('N').value);
+            const k = parseInt(document.getElementById('k').value);
+
+            const frequency = new Array(k).fill(0);
+
+            for (let i = 0; i < N; i++) {
+                const value = Math.random(); // Genera un numero casuale in [0, 1)
+                const interval = Math.floor(value * k);
+                frequency[interval]++;
+            }
+
+            const output = document.getElementById('output');
+            output.innerHTML = "<h2>Distribuzione delle Variabili Casuali</h2>";
+
+            for (let i = 0; i < k; i++) {
+                const lowerBound = i / k;
+                const upperBound = (i + 1) / k;
+                output.innerHTML += `Intervallo [${lowerBound.toFixed(2)}, ${upperBound.toFixed(2)}]: ${frequency[i]}<br>`;
+            }
+        }
+    </script>
+</body>
+</html>
