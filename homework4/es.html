@@ -5,9 +5,21 @@
 </head>
 <body>
     <h1>Parser TSV</h1>
-    <input type="file" id="fileInput" accept=".tsv" />
+    <div>The variables choosen by me are:</div>
+    <div>-TeamLeader or teamPlayer (qualitative variable) </div>
+    <div>-HardWorker (quantitavive discrete variable) </div>
+    <div>-Height (quantitavive continuous variable) </div>
+    <br>
+    <div>
+        <label>Inserisci numero intervalli per variabile continua</label>
+        <input type="text" id="intervals">
+    </div>
+    <div>
+        <label>Inserisci file</label>
+        <input type="file" id="fileInput" accept=".tsv" />
+    </div>
     <div id="output"></div>
- 
+</body>
     <script>
         document.getElementById('fileInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
@@ -16,9 +28,18 @@
                 reader.onload = function (e) {
                     const tsvContent = e.target.result;
                     const data = parseTSV(tsvContent);
-                    const variableRanges = getVariableRanges(data);
-                    const jointDistribution = calculateJointDistribution(data, variableRanges);
-                    displayData(jointDistribution);
+                     
+                    let output = processing(data)
+ 
+                    let freqVar1 = output[0]
+                    let freqVar2 = output[1]
+                    let freqVar3 = output[2]
+                    let freqJointDist = output[3]
+ 
+                    displayData(freqVar1,"TeamLeader or teamPlayer")
+                    displayData(freqVar2,"HardWorker")
+                    displayData(freqVar3,"Height")
+                    displayData(freqJointDist,"LeaderOrPlayer X HardWorker")
                 };
                 reader.readAsText(file);
             }
@@ -33,71 +54,11 @@
             }
             return data;
         }
-
-        function getVariableRanges(data) {
-            const numVariables = data[0].length;
-            const variableRanges = new Array(numVariables);
-            for (let i = 0; i < numVariables; i++) {
-                variableRanges[i] = {
-                    name: data[0][i],
-                    min: Number.MAX_VALUE,
-                    max: Number.MIN_VALUE
-                };
-            }
-
-            for (let i = 1; i < data.length; i++) {
-                for (let j = 0; j < numVariables; j++) {
-                    const value = parseFloat(data[i][j]);
-                    if (!isNaN(value)) {
-                        variableRanges[j].min = Math.min(variableRanges[j].min, value);
-                        variableRanges[j].max = Math.max(variableRanges[j].max, value);
-                    }
-                }
-            }
-
-            return variableRanges;
-        }
-
-        function calculateJointDistribution(data, variableRanges) {
-            const numVariables = variableRanges.length;
-            const subdivisions = []; // Numero di suddivisioni per ciascuna variabile
-            const frequencyMap = new Map();
-
-            for (let i = 0; i < numVariables; i++) {
-                // Aggiungi il numero desiderato di suddivisioni per ciascuna variabile
-                subdivisions[i] = 10; // Puoi personalizzare il numero di suddivisioni
-            }
-
-            for (let i = 1; i < data.length; i++) {
-                const entry = data[i];
-                const key = [];
-                for (let j = 0; j < numVariables; j++) {
-                    const value = parseFloat(entry[j]);
-                    if (!isNaN(value)) {
-                        const range = variableRanges[j];
-                        const interval = (range.max - range.min) / subdivisions[j];
-                        let intervalIndex = Math.floor((value - range.min) / interval);
-                        if (intervalIndex < 0) {
-                            intervalIndex = 0;
-                        }
-                        key.push(intervalIndex);
-                    }
-                }
-
-                const keyString = key.join('-');
-                if (frequencyMap.has(keyString)) {
-                    frequencyMap.set(keyString, frequencyMap.get(keyString) + 1);
-                } else {
-                    frequencyMap.set(keyString, 1);
-                }
-            }
-
-            return frequencyMap;
-        }
-
-        function displayData(jointDistribution) {
-            const outputDiv = document.getElementById('output');
  
+        function displayData(frequencyVar,object) {
+            const outputDiv = document.getElementById('output');
+            
+            
             // Esempio di visualizzazione dei risultati in una tabella HTML
             const table = document.createElement('table');
             const thead = document.createElement('thead');
@@ -105,7 +66,7 @@
  
             // Aggiungi intestazione
             const headerRow = document.createElement('tr');
-            const headers = ['Key', 'Frequency'];
+            const headers = [object, 'Absolute Frequency', 'Relative Frequency', 'Percentage'];
  
             for (const header of headers) {
                 const th = document.createElement('th');
@@ -116,10 +77,12 @@
             thead.appendChild(headerRow);
             table.appendChild(thead);
  
+            let sumVar = Array.from(frequencyVar.values()).reduce((acc, value) => acc + value, 0);
+ 
             // Aggiungi dati
-            for (const [key, value] of jointDistribution) {
+            for (const [key, value] of frequencyVar) {
                 const row = document.createElement('tr');
-                const columns = [key, value];
+                const columns = [key, value, (value / sumVar), ((value / sumVar) * 100)];
  
                 for (const column of columns) {
                     const td = document.createElement('td');
@@ -133,6 +96,129 @@
             table.appendChild(tbody);
             outputDiv.appendChild(table);
         }
+         
+ 
+        function processing(matrix) {
+         
+            const numStatPoints = matrix.length - 1;
+ 
+            const var1 = 8; // indice variabile qualitativa "Team leader or player?"
+            const var2 = 4; // indice variabile quantitativa discreta "Hard Worker"
+            const var3 = 18; // indice variabile quantitativa continua "Height"
+ 
+            const datasetVar1 = new Array(numStatPoints);
+            const datasetVar2 = new Array(numStatPoints);
+            const datasetVar3 = new Array(numStatPoints);
+ 
+            const frequencyVar1 = new Map();
+            const frequencyVar2 = new Map();
+            const frequencyVar3 = new Map();
+ 
+            for (let i = 1; i < matrix.length; i++) {
+                const statPoint = matrix[i];
+                datasetVar1[i - 1] = statPoint[var1];
+                datasetVar2[i - 1] = statPoint[var2];
+                datasetVar3[i - 1] = statPoint[var3];
+            }
+ 
+            for (let i = 0; i < numStatPoints; i++) {
+                let key = datasetVar1[i].toLowerCase().trim();
+                if (key.includes('player')) {
+                    key = 'player';
+                } else if (key.includes('leader')) {
+                    key = 'leader';
+                } else {
+                    continue;
+                }
+                if (frequencyVar1.has(key)) {
+                    frequencyVar1.set(key, frequencyVar1.get(key) + 1);
+                } else {
+                    frequencyVar1.set(key, 1);
+                }
+            }
+ 
+            for (let i = 0; i < numStatPoints; i++) {
+               let key = datasetVar2[i].trim();
+                if (frequencyVar2.has(key)) {
+                    frequencyVar2.set(key, frequencyVar2.get(key) + 1);
+                } else {
+                    frequencyVar2.set(key, 1);
+                }
+            }
+ 
+            //VAR3 QUANTITATIVA CONTINUA
+            let max = Number.MIN_VALUE;
+            let min = Number.MAX_VALUE;
+            let listHeights = [];
+ 
+            for (let i = 0; i < numStatPoints; i++) {
+                let key = datasetVar3[i].trim();
+                let altezza = parseFloat(key);
+                if (!isNaN(altezza) && altezza < 3) {//ho inserito altezza > 3 perche é presente un dato contenente 180 che rende gli intervalli giganteschi
+                    if (altezza > max) max = altezza;
+                    if (altezza < min) min = altezza;
+                    listHeights.push(altezza);
+                }
+            }
+ 
+            let k = parseInt(document.getElementById("intervals").value);
+            console.log(k)
+            let larghezzaIntervallo = parseFloat(((max - min) / k).toFixed(3));
+     
+            for (let i = 0; i <= k; i++) {
+                frequencyVar3.set(i, 0);
+            }
+ 
+            for (const height of listHeights) {
+                let indiceSottoIntervallo = Math.floor((height - min) / larghezzaIntervallo);
+                frequencyVar3.set(indiceSottoIntervallo, frequencyVar3.get(indiceSottoIntervallo) + 1);
+            }
+ 
+            //JOINT DISTRIBUTION
+            const num_variables = 2;
+            const variables = new Array(num_variables);
+            variables[0] = 'Team leader or Team player ?';
+            variables[1] = 'Hard Worker (0-5)';
+            const frequence_joint_distr = frequence_joint(matrix, num_variables, variables);
+ 
+ 
+            return [frequencyVar1,frequencyVar2,frequencyVar3,frequence_joint_distr]
+        }
+ 
+ 
+        function frequence_joint(dataset, numVarSelected, variablesSelected) {
+            const indexesVarSelected = new Array(numVarSelected);
+            const cols = dataset[0].length;
+            const rows = dataset.length;
+            const output = new Map();
+            let cont = 0;
+ 
+            for (let i = 0; i < cols; i++) {
+                if (variablesSelected.includes(dataset[0][i])) {
+                    indexesVarSelected[cont] = i;
+                    cont++;
+                }
+            }
+ 
+            for (let i = 1; i < rows; i++) {
+                const elemento = new Array(numVarSelected);
+                for (let j = 0; j < numVarSelected; j++) {
+                    elemento[j] = dataset[i][indexesVarSelected[j]].toLowerCase().trim();
+                }
+                let key = dataset[0][indexesVarSelected[0]] + ':' + elemento[0];
+                for (let j = 1; j < numVarSelected; j++) {
+                    key = key + ' and ' + 'TeamLEADorPLAYER? ' + ':' + elemento[j];
+                }
+                if (output.has(key)) {
+                    output.set(key, output.get(key) + 1);
+                } else {
+                    output.set(key, 1);
+                }
+            }
+ 
+        return output;
+    }
+ 
     </script>
-</body>
+ 
 </html>

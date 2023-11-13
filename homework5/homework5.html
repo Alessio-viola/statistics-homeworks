@@ -86,10 +86,7 @@
     let day = parseInt(document.getElementById("day").value);
  
     let scores = []; // Array to store security scores for each system
-    let cumulativeScores = []
-    let relScores = []
-    let stdScores = []
- 
+    
     function startSimulation() {
       numSystems = parseInt(numSystemsInput.value);
       numAttacks = parseInt(numAttacksInput.value);
@@ -98,10 +95,7 @@
       successProbabilityInput = lambda * T /(parseInt(numAttacksInput.value)) ;
 
       scores = [];
-      cumulativeScores = []
-      relScores = []
-      stdScores = []
-
+    
       scores.length = 0;
  
       // Simulate security scores for all systems
