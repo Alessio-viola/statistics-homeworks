@@ -1,80 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Security Score Simulation</title>
-</head>
- 
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-    }
- 
-    .section {
-        width: 33.33%;
-        height: 70vh;
-        position: relative;
-        float: left;
-    }
- 
-    .canvas {
-        position: absolute;
-        top: 20px;
-        left: 0;
-        width: 100%;
-        height: 100%;
-    }
-</style>
- 
-<body>
-  <h3>Gambler's Ruin Problem</h3>
-  <div>
-    <label for="numSystemsInput">Number of Systems (M): </label>
-    <input type="number" id="numSystemsInput" min="1" value="100">
-  </div>
-  <div>
-    <label for="numAttacksInput">Number of attacks (N): </label>
-    <input type="number" id="numAttacksInput" min="1" value="100">
-  </div>
-  <div>
-    <label for="successProbabilityInput">Success Probability : </label>
-    <input type="number" id="successProbabilityInput" value="0.5" min="0" max = "1" step="0.01">
-  </div>
-    
-  <div>
-    <label for="security_score">Security score (S) : </label>
-    <input type="number" id="security_score" value="20">
-  </div>
- 
-  <div>
-    <label for="penetration_score">Penetration score (P) : </label>
-    <input type="number" id="penetration_score" value="20" min="20" max="100">
-  </div>
+    <meta charset="utf-8">
+    <title>Security Score Simulation</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
 
-  <div>
-    <label for="Day">Choose a day : </label>
-    <input type="number" id="day" value="70">
-  </div>
- 
-  <button id="startSimulationButton">Start Simulation</button>
-  <div>
-    <div class="section">
-        <label>Chart: </label>
-        <canvas class="canvas" id="myCanvas" height="400"></canvas>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        label, input, button {
+            margin-bottom: 10px;
+        }
+
+        input[type="number"], button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        h3 {
+            text-align: center;
+        }
+
+        .section {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .canvas {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>Security Score Simulation</h3>
+        <div>
+            <label for="numSystemsInput">Number of Systems (M): </label>
+            <input type="number" id="numSystemsInput" min="1" value="100">
+        </div>
+        <div>
+            <label for="numAttacksInput">Number of attacks (N): </label>
+            <input type="number" id="numAttacksInput" min="1" value="100">
+        </div>
+        <div>
+            <label for="successProbabilityInput">Success Probability : </label>
+            <input type="number" id="successProbabilityInput" value="0.5" min="0" max="1" step="0.01">
+        </div>
+        <div>
+            <label for="security_score">Security score (S) : </label>
+            <input type="number" id="security_score" value="20">
+        </div>
+        <div>
+            <label for="penetration_score">Penetration score (P) : </label>
+            <input type="number" id="penetration_score" value="20" min="20" max="100">
+        </div>
+        <div>
+            <label for="Day">Choose a day : </label>
+            <input type="number" id="day" value="70">
+        </div>
+        <button id="startSimulationButton">Start Simulation</button>
+        <div class="section">
+            <label>Chart: </label>
+            <canvas class="canvas" id="myCanvas" height="400"></canvas>
+        </div>
+        <div class="section">
+            <label>Histogram referring last day : </label>
+            <canvas class="canvas" id="histogramCanvas" height="400"></canvas>
+        </div>
+        <div class="section">
+            <label>Histogram referring selected day : </label>
+            <canvas class="canvas" id="histogram1DaySpecified" height="400"></canvas>   
+        </div>
     </div>
-    <div class="section">
-        <label>Histogram referring last day : </label>
-        <canvas class="canvas" id="histogramCanvas" height="400"></canvas>
-    </div>
-    <div class="section">
-        <label>Histogram referring selected day : </label>
-        <canvas class="canvas" id="histogram1DaySpecified" height="400"></canvas>   
-    </div>        
-  </div>
-  
-  <script>
-    const canvas = document.getElementById("myCanvas");
+
+    <script>
+        const canvas = document.getElementById("myCanvas");
     const ctx = canvas.getContext("2d");
   
     let numSystemsInput = document.getElementById("numSystemsInput");
@@ -95,17 +124,14 @@
       
       let score_penetrated_attacks = 0;
       let score_defended_attacks = 0
-      let complessive_score = 0;
 
       for (let attack = 1; attack <= numAttacks; attack++) {
         if (Math.random() < p) {
           score_penetrated_attacks += 1; // System is penetrated
-          complessive_score += 1;
         }else{
           score_defended_attacks +=1
-          complessive_score -= 1;
         } 
-        scores.push(complessive_score);
+        scores.push(score_penetrated_attacks);
         
         // Check if the system should be discarded if the system reach P before S 
         if (score_penetrated_attacks >= P && score_defended_attacks < S) {
@@ -243,7 +269,7 @@
         const canvasHeight = canvas.height;
      
         // Calcola l'altezza di ciascuna barra dell'istogramma
-        const barHeight = canvasHeight / (numIntervals);
+        const barHeight = canvasHeight / (numAttacks * 2);
      
         // Pulisci il canvas
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -251,10 +277,10 @@
         var counter = countOccurrences(data)
          
         // Disegna l'istogramma
-        for (let i = minCount ; i <= numIntervals; i++) {
+        for (let i = 0; i < numAttacks; i++) {
      
             const barWidth = (counter[i] / numSystems) * canvasWidth;
-            const y = (i - minCount + 1) * barHeight;
+            const y = i * barHeight;
      
             // Colore delle barre dell'istogramma
             ctx.fillStyle = "blue";
@@ -329,8 +355,6 @@
         const dataDay = getChooseColumn(scores, day)
         drawHorizontalHistogram(dataDay, "histogram1DaySpecified", day);
     });
-      
-  
-  </script>
+    </script>
 </body>
 </html>
