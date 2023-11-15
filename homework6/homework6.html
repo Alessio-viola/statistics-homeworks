@@ -251,7 +251,7 @@
         var counter = countOccurrences(data)
          
         // Disegna l'istogramma
-        for (let i = minCount ; i <= numIntervals; i++) {
+        for (let i = minCount ; i <= minCount + numIntervals; i++) {
      
             const barWidth = (counter[i] / numSystems) * canvasWidth;
             const y = (i - minCount + 1) * barHeight;

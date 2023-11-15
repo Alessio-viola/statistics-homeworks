@@ -229,7 +229,7 @@
         const canvasHeight = canvas.height;
      
         // Calcola l'altezza di ciascuna barra dell'istogramma
-        const barHeight = canvasHeight / (numAttacks*2);
+        const barHeight = canvasHeight / (numIntervals);
      
         // Pulisci il canvas
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -237,10 +237,10 @@
         var counter = countOccurrences(data)
          
             // Disegna l'istogramma
-        for(let i = 0; i < numAttacks; i++){
+        for(let i = minCount; i < minCount + numIntervals; i++){
      
             const barWidth = (counter[i] / numSystems) * canvasWidth;
-            const y = i * barHeight;
+            const y = (i - minCount + 1) * barHeight;
      
             // Colore delle barre dell'istogramma
             ctx.fillStyle = "blue";

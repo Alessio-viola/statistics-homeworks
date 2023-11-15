@@ -3,12 +3,33 @@
 <head>
   <meta charset="utf-8">
   <title>Security Score Simulation</title>
+  <style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+ 
+    .section {
+        width: 33.33%;
+        height: 70vh;
+        position: relative;
+        float: left;
+    }
+ 
+    .canvas {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
 </head>
 <body>
   <h3>Simulation of Security Score Trajectories</h3>
   <div>
     <label for="numSystemsInput">Number of Systems (M): </label>
-    <input type="number" id="numSystemsInput" min="1" value="10">
+    <input type="number" id="numSystemsInput" min="1" value="100">
   </div>
   <div>
     <label for="numAttacksInput">Number of Attacks (N): </label>
@@ -16,31 +37,91 @@
   </div>
   <div>
     <label for="successProbabilityInput">Success Probability of Attacks: </label>
-    <input type="number" id="successProbabilityInput" min="0" max="1" step="0.01" value="0.3">
+    <input type="number" id="successProbabilityInput" min="0" max="1" step="0.01" value="0.5">
+  </div>
+  <div>
+    <label for="Day">Choose a day : </label>
+    <input type="number" id="day" value="20">
   </div>
   <button id="startSimulationButton">Start Simulation</button>
   <div>
-    <div></div>
-    <canvas id="myCanvas" width="800" height="800"></canvas>
-    <canvas id="histogramCanvas" width="800" height="800"></canvas>   
+    <div class="section">
+      <canvas class="canvas" id="myCanvas"></canvas>
+    </div>
+    <div class="section">
+      <label><b>Histogram referring last day : </b></label>
+      <canvas class="canvas" id="histogramCanvas" ></canvas>
+    </div>
+    <div class="section">
+      <label><b>Histogram referring selected day : </b></label>
+      <canvas class="canvas" id="histogramDay1" ></canvas>
+    </div>   
   </div>
-  
+  <br>
   <div>
     <div>Cumulative Penetration Frequency</div>
-    <canvas id="penetrationFrequencyCanvas" width="800" height="800"></canvas>
-    <canvas id="histogramCanvasCum" width="800" height="800"></canvas>
+    <div>
+      
+      <div class="section">
+        <canvas id="penetrationFrequencyCanvas" class="canvas"></canvas>
+      </div>
+
+      <div class="section">
+        <canvas id="histogramCanvasCum" class="canvas"></canvas>
+      </div>
+      
+      <div class="section">
+        <canvas id="histogramDay2" class="canvas"></canvas>
+      </div>
+
+    </div>
   </div>
   <div>
     <div>Relative Penetration Frequency</div>
-    <canvas id="relativeFrequencyCanvas" width="800" height="800"></canvas>
-    <canvas id="histogramCanvasRel" width="800" height="800"></canvas>
+    
+    <div>
+      <div class="section">
+        <canvas id="relativeFrequencyCanvas" class="canvas"></canvas>  
+      </div>
+
+      <div class="section">
+        <canvas id="histogramCanvasRel" class="canvas"></canvas>
+      </div>
+
+      <div class="section">
+        <canvas id="histogramDay3" class="canvas"></canvas>
+      </div>
+    </div>
+    
   </div>
+
   <div>
-    <canvas id="normalizedRatioCanvas" width="800" height="800"></canvas>
-    <canvas id="histogramCanvasNor" width="800" height="800"></canvas>
+    <div>Normalized Penetration Frequency</div>
+
+    <div>
+
+     <div class="section">
+      <canvas id="normalizedRatioCanvas" class="canvas"></canvas>   
+     </div>
+     <div class="section">
+      <canvas id="histogramCanvasNor" class="canvas"></canvas>
+     </div>
+     <div class="section">
+      <canvas id="histogramDay4" class="canvas"></canvas>
+     </div>
+
+    </div>
+
   </div>
   <script>
     
+    function clearCanvas(canvas) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    let day = parseInt(document.getElementById("day").value);
+
     const canvas = document.getElementById("myCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -64,10 +145,22 @@
     const stdScores = []
 
     function startSimulation() {
+      
+      clearCanvas(canvas);
+      clearCanvas(canvasCum);
+      clearCanvas(canvasRel);
+      clearCanvas(canvasNor);
+
+      scores.length = 0;
+      cumulativeScores.length = 0;
+      relScores.length = 0;
+      stdScores.length = 0;
+
       numSystems = parseInt(numSystemsInput.value);
       numAttacks = parseInt(numAttacksInput.value);
       penetrationProbability = parseFloat(successProbabilityInput.value);
-
+      day = parseInt(document.getElementById("day").value);
+      
       scores.length = 0;
 
       // Simulate security scores for all systems
@@ -191,23 +284,7 @@
       return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
     }
     
-    // Definisci il numero di intervalli e la larghezza di ciascun intervallo
-    const numIntervals = 21; // Ad esempio, 21 intervalli da -N a N
-    const intervalWidth = (2 * numAttacksInput) / numIntervals; // Calcola la larghezza dell'intervallo
-
-    // Crea un array per contare il numero di sistemi in ciascun intervallo
-    const intervalCounts = new Array(numIntervals).fill(0);
-
-    // Assegna ciascun sistema a un intervallo in base al suo punteggio
-    scores.forEach((systemScores) => {
-    systemScores.forEach((score) => {
-        const intervalIndex = Math.floor((score + numAttacksInput) / intervalWidth);
-        // Assicurati che l'indice dell'intervallo sia all'interno dei limiti
-        if (intervalIndex >= 0 && intervalIndex < numIntervals) {
-        intervalCounts[intervalIndex]++;
-        }
-    });
-    });
+    
     
     function drawHorizontalHistogram(data, canvasId) {
        
@@ -228,7 +305,7 @@
     const canvasHeight = canvas.height;
 
     // Calcola l'altezza di ciascuna barra dell'istogramma
-    const barHeight = canvasHeight / (numAttacks*2);
+    const barHeight = canvasHeight / (numIntervals);
 
     // Pulisci il canvas
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -236,10 +313,10 @@
     var counter = countOccurrences(data)
     
         // Disegna l'istogramma
-    for(let i = 2 * numAttacks; i > 0; i--){
+    for(let i = minCount; i < minCount + numIntervals; i++){
 
-        const barWidth = (counter[i-numAttacks] / numSystems) * canvasWidth;
-        const y = i * barHeight;
+        const barWidth = (counter[i] / numSystems) * canvasWidth;
+        const y = canvasHeight - (i - minCount ) * barHeight;
 
         // Colore delle barre dell'istogramma
         ctx.fillStyle = "blue";
@@ -247,7 +324,7 @@
 
         // Testo per l'etichetta dell'intervallo sull'asse orizzontale
         ctx.fillStyle = "black";
-        ctx.fillText(`[${i-numAttacks};${i - numAttacks + 1})`, barWidth + 5, y + barHeight / 2);
+        ctx.fillText(`[${i};${i + 1})`, barWidth + 5, y + barHeight / 2);
         }
     }
 
@@ -320,29 +397,33 @@
           for(let i = 0; i < numIntervals; i++){
 
            const barWidth = (counter[i]/numSystems) * canvasWidth;
-           const y = i * barHeight;
+           const y = canvasHeight - i * barHeight;
    
            // Colore delle barre dell'istogramma
            ctx.fillStyle = "blue";
            ctx.fillRect(0, y, barWidth, barHeight);
            
            // Testo per l'etichetta dell'intervallo sull'asse orizzontale
-          ctx.fillStyle = "black";
-          ctx.fillText(`Interval ${i}`, barWidth + 5, y + barHeight / 2);
+          //ctx.fillStyle = "black";
+          //ctx.fillText(`Interval ${i}`, barWidth + 5, y + barHeight / 2);
 
            }
        }
        
+       function Decimal_to_distribute_values(value, decimalPlaces) {
+        const multiplier = Math.pow(10, decimalPlaces);
+        return Math.floor(value * multiplier);
+       }
+
        function drawHorizontalHistogramSTD(data, canvasId) {
-       
+
        numSystems = parseInt(numSystemsInput.value);
        numAttacks = parseInt(numAttacksInput.value);
        penetrationProbability = parseFloat(successProbabilityInput.value);
-               // Crea un array per contare il numero di elementi in ciascun intervallo
-       const maxCount = Math.max(...data);
-       const minCount = Math.min(...data);
-       const numIntervals = Math.floor(Math.sqrt(numAttacks));
-   
+       
+       let numIntervals = Math.floor(numAttacks)
+        console.log(numIntervals)
+
        // Recupera il canvas HTML dall'ID fornito
        const canvas = document.getElementById(canvasId);
        const ctx = canvas.getContext("2d");
@@ -358,18 +439,17 @@
        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
    
          let counter = new Array(numIntervals).fill(0)
-        
-         for(let i = 0; i < numSystems; i++){
-            counter[Math.floor(data[i])] ++;
-         }
           
-         console.log(counter)
+         for(let i = 0; i < numSystems; i++){
+          counter[Decimal_to_distribute_values(data[i],1)]++
+         }
 
+          console.log(counter)
          // Disegna l'istogramma
           for(let i = 0; i < numIntervals; i++){
 
            const barWidth = (counter[i]/numSystems) * canvasWidth;
-           const y = i * barHeight;
+           const y = canvasHeight - (i+1) * barHeight;
    
            // Colore delle barre dell'istogramma
            ctx.fillStyle = "blue";
@@ -377,9 +457,29 @@
            
            // Testo per l'etichetta dell'intervallo sull'asse orizzontale
           ctx.fillStyle = "black";
-          ctx.fillText(`Interval ${i}`, barWidth + 5, y + barHeight / 2);
+          //ctx.fillText(`Interval ${i}`, barWidth + 5, y + barHeight / 2);
 
            }
+       }
+
+       function getChooseColumn(matrix,column){
+        if (matrix.length === 0) {
+        // La matrice è vuota, quindi non c'è alcuna colonna
+        return [];
+        }
+          
+        
+        const numRows = matrix.length;
+        const ChooseColumn = [];
+     
+        for (let i = 0; i < numRows; i++) {
+            const row = matrix[i];
+            const element = row[column - 1]; // Prende l'ultimo elemento della riga
+             
+            ChooseColumn.push(element);
+        }
+     
+        return ChooseColumn;
        }
     
     
@@ -388,8 +488,18 @@
         const data = getMatrixLastColumn(scores)
         drawHorizontalHistogram(data, "histogramCanvas");
 
+        const dataDay = getChooseColumn(scores,day)
+        drawHorizontalHistogram(dataDay, "histogramDay1");
+          
+        //--------------------------------------------------------
+
         const dataCum = getMatrixLastColumn(cumulativeScores);
         drawHorizontalHistogram(dataCum, "histogramCanvasCum");
+        
+        const dataCumDay = getChooseColumn(cumulativeScores,day)
+        drawHorizontalHistogram(dataCumDay, "histogramDay2");
+        
+        //--------------------------------------------------------
 
         let dataRel = new Array(numSystems).fill(0);
         for(let i = 0; i < numSystems; i++){
@@ -397,13 +507,24 @@
         }
         drawHorizontalHistogramPercentual(dataRel, "histogramCanvasRel");
 
+        let dataRelDay = new Array(numSystems).fill(0); 
+        for(let i = 0; i < numSystems; i++){
+          dataRelDay[i] = (dataCumDay[i]/day)*numSystems; 
+        }
+        drawHorizontalHistogramPercentual(dataRelDay, "histogramDay3");
+        //----------------------------------------------------------------------
         let dataSTD = new Array(numSystems).fill(0);
         for(let i = 0; i < numSystems; i++){
           dataSTD[i] = (dataCum[i]/Math.sqrt(numAttacks)); 
         }
-        console.log(dataSTD)
-        drawHorizontalHistogramPercentual(dataSTD, "histogramCanvasNor");
-    });
+        drawHorizontalHistogramSTD(dataSTD, "histogramCanvasNor");
+
+        let dataSTDDay = new Array(numSystems).fill(0);
+        for(let i = 0; i < numSystems; i++){
+          dataSTDDay[i] = (dataCumDay[i]/Math.sqrt(day)); 
+        }
+        drawHorizontalHistogramSTD(dataSTDDay, "histogramDay4");
+      });
     
 
   </script>
