@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Stochastic Processes and SDEs</title>
+  <style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+ 
+    .section {
+        width: 33.33%;
+        height: 70vh;
+        position: relative;
+        float: left;
+    }
+ 
+    .canvas {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+</head>
+<body>
+  <h3>Stochastic Processes and SDEs</h3>
+  <div>
+    <label for="numSystemsInput">Number of Systems (M): </label>
+    <input type="number" id="numSystemsInput" min="1" value="100">
+  </div>
+  <div>
+    <label for="numAttacksInput">Number of Attacks (N): </label>
+    <input type="number" id="numAttacksInput" min="1" value="50">
+  </div>
+  
+  <div>
+    <label for="numIntervals">Histograms's Intervals : </label>
+    <input type="number" id="numberOfIntervals" value="10">
+  </div>
+  <div>
+    <label for="Day">Choose a day : </label>
+    <input type="number" id="day" value="20">
+  </div>
+
+  <div>
+    <label for="stochasticProcess">Select Stochastic Process: </label>
+    <select id="stochasticProcess">
+      <option value="arithmeticBrownian">Arithmetic Brownian</option>
+      <option value="geometricBrownian">Geometric Brownian (Black-Scholes)</option>
+      <option value="ornsteinUhlenbeck">Ornstein-Uhlenbeck (mean-reverting)</option>
+      <option value="vasicek">Vasicek</option>
+      <option value="hullWhite">Hull-White</option>
+      <option value="coxIngersollRoss">Cox-Ingersoll-Ross</option>
+      <option value="blackKarasinski">Black-Karasinski</option>
+      <option value="heston">Heston</option>
+      <option value="chenModel">Chen Model</option>
+    </select>
+  </div>
+
+  <button id="startSimulationButton">Start Simulation</button>
+  <div>
+    <div class="section">
+      <canvas class="canvas" id="myCanvas"></canvas>
+    </div>
+    <div class="section">
+      <label><b>Histogram referring last day : </b></label>
+      <canvas class="canvas" id="histogramCanvas" ></canvas>
+    </div>
+    <div class="section">
+      <label><b>Histogram referring selected day : </b></label>
+      <canvas class="canvas" id="histogramDay1" ></canvas>
+    </div>   
+  </div>
+  <br>
+  <div>
+    
+    <div>
+      
+      <div class="section">
+        <canvas id="penetrationFrequencyCanvas" class="canvas"></canvas>
+      </div>
+
+      <div class="section">
+        <canvas id="histogramCanvasCum" class="canvas"></canvas>
+      </div>
+      
+      <div class="section">
+        <canvas id="histogramDay2" class="canvas"></canvas>
+      </div>
+
+    </div>
+  </div>
+  <div>
+    
+    
+    <div>
+      <div class="section">
+        <canvas id="relativeFrequencyCanvas" class="canvas"></canvas>  
+      </div>
+
+      <div class="section">
+        <canvas id="histogramCanvasRel" class="canvas"></canvas>
+      </div>
+
+      <div class="section">
+        <canvas id="histogramDay3" class="canvas"></canvas>
+      </div>
+    </div>
+    
+  </div>
+
+  <div>
+    
+    <div>
+
+     <div class="section">
+      <canvas id="normalizedRatioCanvas" class="canvas"></canvas>   
+     </div>
+     <div class="section">
+      <canvas id="histogramCanvasNor" class="canvas"></canvas>
+     </div>
+     <div class="section">
+      <canvas id="histogramDay4" class="canvas"></canvas>
+     </div>
+
+    </div>
+
+  </div>
+  <script>
+    
+    function clearCanvas(canvas) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    let day = parseInt(document.getElementById("day").value);
+    let num_intervals = parseInt(document.getElementById("numberOfIntervals").value); 
+
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const canvasCum = document.getElementById("penetrationFrequencyCanvas");
+    const ctxCum = canvasCum.getContext("2d");
+
+    const canvasRel = document.getElementById("relativeFrequencyCanvas");
+    const ctxRel = canvasRel.getContext("2d");
+    
+    const canvasNor = document.getElementById("normalizedRatioCanvas");
+    const ctxNor = canvasNor.getContext("2d");
+
+    const numSystemsInput = document.getElementById("numSystemsInput");
+    const numAttacksInput = document.getElementById("numAttacksInput");
+    
+    const startSimulationButton = document.getElementById("startSimulationButton");
+
+    const scores = []; // Array to store security scores for each system
+    const cumulativeScores = []
+    const relScores = []
+    const stdScores = []
+    
+    let selectedProcess = document.getElementById("stochasticProcess").value;
+
+    function startSimulation() {
+      
+      clearCanvas(canvas);
+      clearCanvas(canvasCum);
+      clearCanvas(canvasRel);
+      clearCanvas(canvasNor);
+
+      scores.length = 0;
+      cumulativeScores.length = 0;
+      relScores.length = 0;
+      stdScores.length = 0;
+
+      numSystems = parseInt(numSystemsInput.value);
+      numAttacks = parseInt(numAttacksInput.value);
+      day = parseInt(document.getElementById("day").value);
+      selectedProcess = document.getElementById("stochasticProcess").value;
+      num_intervals = parseInt(document.getElementById("numberOfIntervals").value);
+
+      scores.length = 0;
+      
+      switch (selectedProcess) {
+        case "arithmeticBrownian":
+          // Simulate security scores for all systems
+            for (let i = 0; i < numSystems; i++) {
+
+              let all_scores = simulateSecurityScoresArithmeticBrownian(numAttacks);
+
+              const systemScores = all_scores[0];
+              scores.push(systemScores);
+
+              const systemCumScores = all_scores[1];
+              cumulativeScores.push(systemCumScores)
+
+              const systemRelScores = all_scores[2]
+              relScores.push(systemRelScores)
+
+              const systemNorScores = all_scores[3];
+              stdScores.push(systemNorScores)
+            }
+          break;
+
+        case "geometricBrownian":
+        
+        // Simulate security scores for all systems
+            for (let i = 0; i < numSystems; i++) {
+
+              let all_scores = simulateSecurityScoresGeometricBrownian(numAttacks);
+
+              const systemScores = all_scores[0];
+              scores.push(systemScores);
+
+              const systemCumScores = all_scores[1];
+              cumulativeScores.push(systemCumScores)
+
+              const systemRelScores = all_scores[2]
+              relScores.push(systemRelScores)
+
+              const systemNorScores = all_scores[3];
+              stdScores.push(systemNorScores)
+            }
+          break;
+
+        case "ornsteinUhlenbeck":
+
+          // Simulate security scores for all systems
+          for (let i = 0; i < numSystems; i++) {
+            let all_scores = simulateOrnsteinUhlenbeckScores(numAttacks);
+
+            const systemScores = all_scores[0];
+            scores.push(systemScores);
+
+            const systemCumScores = all_scores[1];
+            cumulativeScores.push(systemCumScores)
+
+            const systemRelScores = all_scores[2]
+            relScores.push(systemRelScores)
+
+            const systemNorScores = all_scores[3];
+            stdScores.push(systemNorScores)
+            }
+          break;
+
+        case "vasicek":
+          // Simulate security scores for all systems
+          for (let i = 0; i < numSystems; i++) {
+            let all_scores = simulateVasicekScores(numAttacks);
+
+            const systemScores = all_scores[0];
+            scores.push(systemScores);
+
+            const systemCumScores = all_scores[1];
+            cumulativeScores.push(systemCumScores)
+
+            const systemRelScores = all_scores[2]
+            relScores.push(systemRelScores)
+
+            const systemNorScores = all_scores[3];
+            stdScores.push(systemNorScores)
+            }
+          break;
+        
+        case "hullWhite":
+          // Simulate security scores for all systems
+          for (let i = 0; i < numSystems; i++) {
+            let all_scores = simulateHullWhiteScores(numAttacks);
+
+            const systemScores = all_scores[0];
+            scores.push(systemScores);
+
+            const systemCumScores = all_scores[1];
+            cumulativeScores.push(systemCumScores)
+
+            const systemRelScores = all_scores[2]
+            relScores.push(systemRelScores)
+
+            const systemNorScores = all_scores[3];
+            stdScores.push(systemNorScores)
+            }
+            break;
+        case "coxIngersollRoss":
+          // Simulate security scores for all systems
+          for (let i = 0; i < numSystems; i++) {
+            let all_scores = simulateCIRScores(numAttacks);
+
+            const systemScores = all_scores[0];
+            scores.push(systemScores);
+
+            const systemCumScores = all_scores[1];
+            cumulativeScores.push(systemCumScores)
+
+            const systemRelScores = all_scores[2]
+            relScores.push(systemRelScores)
+
+            const systemNorScores = all_scores[3];
+            stdScores.push(systemNorScores)
+            }
+            break;
+          case "blackKarasinski":
+            // Simulate security scores for all systems
+          for (let i = 0; i < numSystems; i++) {
+            let all_scores = simulateBlackKarasinskiScores(numAttacks);
+
+            const systemScores = all_scores[0];
+            scores.push(systemScores);
+
+            const systemCumScores = all_scores[1];
+            cumulativeScores.push(systemCumScores)
+
+            const systemRelScores = all_scores[2]
+            relScores.push(systemRelScores)
+
+            const systemNorScores = all_scores[3];
+            stdScores.push(systemNorScores)
+            }  
+            break
+          case "heston":
+            // Simulate security scores for all systems
+          for (let i = 0; i < numSystems; i++) {
+            let all_scores = simulateHestonScores(numAttacks);
+
+            const systemScores = all_scores[0];
+            scores.push(systemScores);
+
+            const systemCumScores = all_scores[1];
+            cumulativeScores.push(systemCumScores)
+
+            const systemRelScores = all_scores[2]
+            relScores.push(systemRelScores)
+
+            const systemNorScores = all_scores[3];
+            stdScores.push(systemNorScores)
+            }
+            break;
+          case "chenModel":
+            // Simulate security scores for all systems
+          for (let i = 0; i < numSystems; i++) {
+            let all_scores = simulateChenModel(numAttacks);
+
+            const systemScores = all_scores[0];
+            scores.push(systemScores);
+
+            const systemCumScores = all_scores[1];
+            cumulativeScores.push(systemCumScores)
+
+            const systemRelScores = all_scores[2]
+            relScores.push(systemRelScores)
+
+            const systemNorScores = all_scores[3];
+            stdScores.push(systemNorScores)
+            }
+            break;
+
+        default:
+          // Handle default case
+          break;
+      }
+
+      drawSecurityScores(scores,canvas,ctx);
+      drawSecurityScores(cumulativeScores,canvasCum,ctxCum)
+      drawSecurityScores(relScores,canvasRel,ctxRel)
+      drawSecurityScores(stdScores,canvasNor,ctxNor)
+               
+      const data = getMatrixLastColumn(scores)
+      const classified_data = classifier(data,num_intervals)
+      drawHorizontalHistogram(classified_data, "histogramCanvas");
+      const classified_data_day = classifier(getChooseColumn(scores,day),num_intervals)
+      drawHorizontalHistogram(classified_data_day, "histogramDay1");
+
+      const dataCum = getMatrixLastColumn(cumulativeScores);
+      const classified_data_cum = classifier(dataCum,num_intervals)
+      drawHorizontalHistogram(classified_data_cum, "histogramCanvasCum");
+      const classified_data_cum_day = classifier(getChooseColumn(cumulativeScores,day),num_intervals)
+      drawHorizontalHistogram(classified_data_cum_day, "histogramDay2");
+
+      const dataRel = getMatrixLastColumn(relScores);
+      const classified_data_rel = classifier(dataRel,num_intervals)
+      drawHorizontalHistogram(classified_data_rel, "histogramCanvasRel");
+      const classified_data_rel_day = classifier(getChooseColumn(relScores,day),num_intervals)
+      drawHorizontalHistogram(classified_data_rel_day, "histogramDay3");
+
+      const dataSTD = getMatrixLastColumn(stdScores);
+      const classified_data_std = classifier(dataSTD,num_intervals)
+      drawHorizontalHistogram(classified_data_std, "histogramCanvasNor");
+      const classified_data_std_day = classifier(getChooseColumn(stdScores,day),num_intervals)
+      drawHorizontalHistogram(classified_data_std_day, "histogramDay4");
+     
+  }
+    
+    startSimulationButton.addEventListener("click", startSimulation);
+
+    // Classifier
+    function classifier(data, numIntervalli) {
+      if (!Array.isArray(data) || data.length === 0 || typeof numIntervalli !== 'number' || numIntervalli <= 0) {
+        throw new Error('Input non valido. Assicurati che "data" sia un array non vuoto e "numIntervalli" sia un numero positivo.');
+      }
+
+      const minData = Math.min(...data);
+      const maxData = Math.max(...data);
+
+      const intervalSize = (maxData - minData) / numIntervalli;
+
+      const counters = Array.from({ length: numIntervalli }, () => 0);
+
+      for (const value of data) {
+        // Calcola l'indice dell'intervallo considerando il caso in cui il valore è uguale al valore massimo
+        let intervalIndex = Math.floor((value - minData) / intervalSize);
+
+        // Assicurati che il valore rientri nell'intervallo corretto anche se è uguale a maxData
+        if (value === maxData) {
+          intervalIndex = numIntervalli - 1;
+        } else {
+          intervalIndex = Math.min(intervalIndex, numIntervalli - 1);
+        }
+
+        counters[intervalIndex]++;
+      }
+
+      return counters;
+    }
+
+
+        // Function to simulate security scores for a single system using Arithmetic Brownian Motion
+    function simulateSecurityScoresArithmeticBrownian(numAttacks) {
+      const scores = [];
+      const cumScores = [];
+      const relScores = [];
+      const norScores = [];
+
+      let score = 0;
+      let cumulativeScore = 0;
+      let relScore = 0;
+      let norScore = 0;
+
+      for (let attack = 1; attack <= numAttacks; attack++) {
+        const rand = Math.random();
+        const increment = 0.1 + 0.2 * rand; // Arithmetic Brownian Motion increment
+        score += increment;
+
+        if (score < 0) {
+          // Ensure the score is non-negative
+          score = 0;
+        }
+
+        cumulativeScore += score;
+        relScore = cumulativeScore / attack;
+        norScore = cumulativeScore / Math.sqrt(attack);
+
+        scores.push(score);
+        cumScores.push(cumulativeScore);
+        relScores.push(relScore);
+        norScores.push(norScore);
+      }
+
+      return [scores, cumScores, relScores, norScores];
+    }
+
+    function simulateSecurityScoresGeometricBrownian(numAttacks, initialPrice = 5, drift = 0.1, volatility = 0.02) {
+      const prices = [];
+      const cumPrices = [];
+      const relPrices = [];
+      const norPrices = [];
+
+      let price = initialPrice;
+      let cumulativePrice = initialPrice;
+      let relPrice = initialPrice;
+      let norPrice = initialPrice;
+
+      for (let attack = 1; attack <= numAttacks; attack++) {
+        const rand = standardNormalDistribution(); // Standard normal distribution random number
+        const increment = drift * price + volatility * price * rand; // Geometric Brownian Motion increment
+        price *= Math.exp(increment);
+
+        if (price < 0) {
+          // Ensure the price is non-negative
+          price = 0;
+        }
+
+        cumulativePrice += price;
+        relPrice = cumulativePrice / attack;
+        norPrice = cumulativePrice / Math.sqrt(attack);
+
+        prices.push(price);
+        cumPrices.push(cumulativePrice);
+        relPrices.push(relPrice);
+        norPrices.push(norPrice);
+      }
+
+      return [prices, cumPrices, relPrices, norPrices];
+    }
+
+    function simulateHullWhiteScores(numSteps, mean = 0.1, kappa = 0.3, sigma = 0.02, dt = 1) {
+      const scores = [];
+      const cumScores = [];
+      const relScores = [];
+      const norScores = [];
+
+      let score = 0;
+      let cumulativeScore = 0;
+      let relScore = 0;
+      let norScore = 0;
+
+      for (let step = 1; step <= numSteps; step++) {
+        const rand = standardNormalDistribution();
+        const increment = kappa * (mean - score) * dt + sigma * Math.sqrt(dt) * rand; // Hull-White process increment
+        score += increment;
+
+        cumulativeScore += score;
+        relScore = cumulativeScore / step;
+        norScore = cumulativeScore / Math.sqrt(step);
+
+        scores.push(score);
+        cumScores.push(cumulativeScore);
+        relScores.push(relScore);
+        norScores.push(norScore);
+      }
+
+      return [scores, cumScores, relScores, norScores];
+    }
+
+    // Function to generate a random number from a standard normal distribution
+    function standardNormalDistribution() {
+      let u = 0,
+        v = 0;
+      while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+    
+
+    function simulateOrnsteinUhlenbeckScores(numSteps, mean = 0, theta = 0.1, sigma = 0.2) {
+      const scores = [];
+      const cumScores = [];
+      const relScores = [];
+      const norScores = [];
+
+      let score = 0;
+      let cumulativeScore = 0;
+      let relScore = 0;
+      let norScore = 0;
+
+      for (let step = 1; step <= numSteps; step++) {
+        const rand = standardNormalDistribution();
+        const increment = theta * (mean - score) + sigma * rand; // Ornstein–Uhlenbeck process increment
+        score += increment;
+
+        cumulativeScore += score;
+        relScore = cumulativeScore / step;
+        norScore = cumulativeScore / Math.sqrt(step);
+
+        scores.push(score);
+        cumScores.push(cumulativeScore);
+        relScores.push(relScore);
+        norScores.push(norScore);
+      }
+
+      return [scores, cumScores, relScores, norScores];
+    }
+
+    function simulateVasicekScores(numSteps, mean = 0.1, kappa = 0.3, sigma = 0.2, dt = 1) {
+      const scores = [];
+      const cumScores = [];
+      const relScores = [];
+      const norScores = [];
+
+      let score = 0;
+      let cumulativeScore = 0;
+      let relScore = 0;
+      let norScore = 0;
+
+      for (let step = 1; step <= numSteps; step++) {
+        const rand = standardNormalDistribution();
+        const increment = kappa * (mean - score) * dt + sigma * Math.sqrt(dt) * rand; // Vasicek process increment
+        score += increment;
+
+        cumulativeScore += score;
+        relScore = cumulativeScore / step;
+        norScore = cumulativeScore / Math.sqrt(step);
+
+        scores.push(score);
+        cumScores.push(cumulativeScore);
+        relScores.push(relScore);
+        norScores.push(norScore);
+      }
+
+      return [scores, cumScores, relScores, norScores];
+    }
+
+    function simulateCIRScores(numSteps, mean = 0.1, kappa = 0.3, sigma = 0.02, dt = 1) {
+      const scores = [];
+      const cumScores = [];
+      const relScores = [];
+      const norScores = [];
+
+      let score = 0;
+      let cumulativeScore = 0;
+      let relScore = 0;
+      let norScore = 0;
+
+      for (let step = 1; step <= numSteps; step++) {
+        const rand = standardNormalDistribution();
+        const increment = kappa * (mean - score) * dt + sigma * Math.sqrt(score) * Math.sqrt(dt) * rand; // Cox-Ingersoll-Ross process increment
+        score += increment;
+
+        if (score < 0) {
+          // Ensure the score is non-negative
+          score = 0;
+        }
+
+        cumulativeScore += score;
+        relScore = cumulativeScore / step;
+        norScore = cumulativeScore / Math.sqrt(step);
+
+        scores.push(score);
+        cumScores.push(cumulativeScore);
+        relScores.push(relScore);
+        norScores.push(norScore);
+      }
+
+      return [scores, cumScores, relScores, norScores];
+    }
+
+    function simulateBlackKarasinskiScores(numSteps, mean = 0.1, kappa = 0.3, sigma = 0.02, eta = 0.02, dt = 1) {
+      const scores = [];
+      const cumScores = [];
+      const relScores = [];
+      const norScores = [];
+
+      let score = 0;
+      let cumulativeScore = 0;
+      let relScore = 0;
+      let norScore = 0;
+
+      for (let step = 1; step <= numSteps; step++) {
+        const rand = standardNormalDistribution();
+        const increment = kappa * (mean - score) * dt + sigma * Math.pow(score, eta) * Math.sqrt(dt) * rand; // Black-Karasinski process increment
+        score += increment;
+
+        if (score < 0) {
+          // Ensure the score is non-negative
+          score = 0;
+        }
+
+        cumulativeScore += score;
+        relScore = cumulativeScore / step;
+        norScore = cumulativeScore / Math.sqrt(step);
+
+        scores.push(score);
+        cumScores.push(cumulativeScore);
+        relScores.push(relScore);
+        norScores.push(norScore);
+      }
+
+      return [scores, cumScores, relScores, norScores];
+    }
+
+    function simulateHestonScores(numSteps, initialPrice = 5, mean = 0.1, kappa = 1.5, theta = 0.04, sigma = 0.2, rho = -0.7, dt = 1) {
+      const prices = [];
+      const cumPrices = [];
+      const relPrices = [];
+      const norPrices = [];
+      const volatilities = [];
+
+      let price = initialPrice;
+      let cumulativePrice = initialPrice;
+      let relPrice = initialPrice;
+      let norPrice = initialPrice;
+      let volatility = theta;
+
+      for (let step = 1; step <= numSteps; step++) {
+        const rand1 = standardNormalDistribution();
+        const rand2 = standardNormalDistribution();
+        const sqrtDt = Math.sqrt(dt);
+
+        const dPrice = mean * price * dt + Math.sqrt(volatility) * price * sqrtDt * rand1;
+        price += dPrice;
+
+        if (price < 0) {
+          // Ensure the price is non-negative
+          price = 0;
+        }
+
+        cumulativePrice += price;
+        relPrice = cumulativePrice / step;
+        norPrice = cumulativePrice / Math.sqrt(step);
+
+        const dVolatility = kappa * (theta - volatility) * dt + sigma * Math.sqrt(volatility) * sqrtDt * (rho * rand1 + Math.sqrt(1 - rho ** 2) * rand2);
+        volatility += dVolatility;
+
+        if (volatility < 0) {
+          // Ensure the volatility is non-negative
+          volatility = 0;
+        }
+
+        prices.push(price);
+        cumPrices.push(cumulativePrice);
+        relPrices.push(relPrice);
+        norPrices.push(norPrice);
+        volatilities.push(volatility);
+      }
+
+      return [prices, cumPrices, relPrices, norPrices, volatilities];
+    }
+
+    function simulateChenModel(numSteps, initialPrice = 5, mean = 0.1, kappa = 1.5, theta = 0.04, sigma = 0.2, rho = -0.7, eta = 0.1, dt = 1) {
+      const prices = [];
+      const cumPrices = [];
+      const relPrices = [];
+      const norPrices = [];
+      const volatilities = [];
+
+      let price = initialPrice;
+      let cumulativePrice = initialPrice;
+      let relPrice = initialPrice;
+      let norPrice = initialPrice;
+      let volatility = theta;
+
+      for (let step = 1; step <= numSteps; step++) {
+        const rand1 = standardNormalDistribution();
+        const rand2 = standardNormalDistribution();
+        const sqrtDt = Math.sqrt(dt);
+
+        const dPrice = mean * price * dt + Math.sqrt(volatility) * price * sqrtDt * rand1;
+        price += dPrice;
+
+        if (price < 0) {
+          // Ensure the price is non-negative
+          price = 0;
+        }
+
+        cumulativePrice += price;
+        relPrice = cumulativePrice / step;
+        norPrice = cumulativePrice / Math.sqrt(step);
+
+        const dVolatility = kappa * (theta - volatility) * dt + sigma * Math.sqrt(volatility) * sqrtDt * (rho * rand1 + Math.sqrt(1 - rho ** 2) * rand2);
+        volatility += dVolatility;
+
+        if (volatility < 0) {
+          // Ensure the volatility is non-negative
+          volatility = 0;
+        }
+
+        const dLambda = -eta * (volatility ** 2) * dt + Math.sqrt(volatility) * eta * sqrtDt * rand2;
+        volatility += dLambda;
+
+        if (volatility < 0) {
+          // Ensure the volatility is non-negative
+          volatility = 0;
+        }
+
+        prices.push(price);
+        cumPrices.push(cumulativePrice);
+        relPrices.push(relPrice);
+        norPrices.push(norPrice);
+        volatilities.push(volatility);
+      }
+
+      return [prices, cumPrices, relPrices, norPrices, volatilities];
+    }
+
+    // Function to simulate security scores for a single system
+    function simulateSecurityScores(numAttacks, p) {
+      const scores = [];
+      const cumScores = []
+      const relScores = []
+      const norScores = []
+       
+      let score = 0;
+      let cumulativeScore = 0
+      let relScore = 0
+      let norScore = 0
+
+      for (let attack = 1; attack <= numAttacks; attack++) {
+        if (Math.random() < p) {
+          score -= 1; // System is penetrated
+          cumulativeScore += 1
+          relScore = cumulativeScore / attack;
+          norScore =  cumulativeScore / Math.sqrt(attack)
+        } else {
+          score += 1; // System is successfully protected
+        }
+        scores.push(score);
+        cumScores.push(cumulativeScore)
+        relScores.push(relScore)
+        norScores.push(norScore)
+      }
+
+      return [scores,cumScores,relScores,norScores];
+    }
+
+    function drawSecurityScores(scores,canvas,ctx) {
+      const numTrajectories = scores.length;
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, width, height);
+
+      // Find the maximum and minimum scores for scaling
+      let minScore = 0;
+      let maxScore = 0;
+
+      scores.forEach((systemScores) => {
+        minScore = Math.min(minScore, ...systemScores);
+        maxScore = Math.max(maxScore, ...systemScores);
+      });
+
+      // Scale the scores for drawing
+      const scoreRange = maxScore - minScore;
+      const scoreScale = height / scoreRange;
+
+      // Draw the y-axis (ordinates)
+      ctx.beginPath();
+      ctx.moveTo(50, 0);
+      ctx.lineTo(50, height);
+      ctx.stroke();
+
+      // Draw the x-axis (ascisses)
+      ctx.beginPath();
+      ctx.moveTo(50, height);
+      ctx.lineTo(width, height);
+      ctx.stroke();
+
+      // Draw labels for the y-axis
+      for (let i = minScore; i <= maxScore; i++) {
+        const labelY = height - (i - minScore) * scoreScale;
+        ctx.fillText(i, 30, labelY);
+      }
+
+      // Draw numbers for the x-axis (attacks)
+    for (let i = 0; i <= numAttacks; i += 10) {
+        const labelX = (i / numAttacks) * (width - 50) + 50;
+        ctx.fillText(i, labelX, height + 20);
+    }
+
+
+      // Draw score trajectories for all systems
+      scores.forEach((systemScores, index) => {
+        ctx.beginPath();
+        ctx.strokeStyle = getRandomColor();
+        for (let i = 0; i < numAttacks; i++) {
+          const x = (i / numAttacks) * (width - 50) + 50;
+          const y = height - (systemScores[i] - minScore) * scoreScale;
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+      });
+    }
+    
+    // Generate a random color for each system trajectory
+    function getRandomColor() {
+      return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+    }
+    
+    
+    
+    function drawHorizontalHistogram(data_classified, canvasId) {
+       
+      numSystems = parseInt(numSystemsInput.value);
+      numAttacks = parseInt(numAttacksInput.value);
+      
+      
+      // Recupera il canvas HTML dall'ID fornito
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+
+      // Imposta la larghezza e l'altezza del canvas
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+
+      let numIntervals = data_classified.length
+
+      // Calcola l'altezza di ciascuna barra dell'istogramma
+      const barHeight = canvasHeight / numIntervals;
+
+      // Pulisci il canvas
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+          // Disegna l'istogramma
+      for(let i = 0; i < numIntervals; i++){
+
+          const barWidth = (data_classified[i] / numSystems) * canvasWidth;
+          const y = canvasHeight - (i * barHeight);
+
+          // Colore delle barre dell'istogramma
+          ctx.fillStyle = "blue";
+          ctx.fillRect(0, y, barWidth, barHeight);
+
+          // Testo per l'etichetta dell'intervallo sull'asse orizzontale
+          ctx.fillStyle = "black";
+          ctx.fillText(`Interval:${i}`, barWidth + 5, y - barHeight / 2);
+        }
+    }
+   
+    function getMatrixLastColumn(matrix) {
+      if (matrix.length === 0) {
+          // La matrice è vuota, quindi non c'è alcuna colonna
+          return [];
+      }
+
+      const numRows = matrix.length;
+      const lastColumn = [];
+
+      for (let i = 0; i < numRows; i++) {
+          const row = matrix[i];
+          const lastElement = row[row.length - 1]; // Prende l'ultimo elemento della riga
+          lastColumn.push(lastElement);
+      }
+
+      return lastColumn;
+    }
+  
+    function getChooseColumn(matrix,column){
+      if (matrix.length === 0) {
+      // La matrice è vuota, quindi non c'è alcuna colonna
+      return [];
+      }
+                  
+      const numRows = matrix.length;
+      const ChooseColumn = [];
+     
+      for (let i = 0; i < numRows; i++) {
+          const row = matrix[i];
+          const element = row[column - 1]; // Prende l'ultimo elemento della riga
+             
+          ChooseColumn.push(element);
+      }
+     
+      return ChooseColumn;
+    }
+  
+  </script>
+</body>
+</html>

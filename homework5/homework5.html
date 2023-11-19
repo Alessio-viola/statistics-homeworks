@@ -240,7 +240,7 @@
         for(let i = minCount; i < minCount + numIntervals; i++){
      
             const barWidth = (counter[i] / numSystems) * canvasWidth;
-            const y = (i - minCount + 1) * barHeight;
+            const y = canvasHeight - (i - minCount + 1) * barHeight;
      
             // Colore delle barre dell'istogramma
             ctx.fillStyle = "blue";
