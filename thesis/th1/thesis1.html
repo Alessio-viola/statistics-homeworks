@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The LLN Meaning, Proof, and Simulations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+        }
+        .text-container {
+            width: 65%;
+            margin-right: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .image-container {
+            width: 35%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-container">
+        <h1>The Law of Large Numbers (LLN)</h1>
+        <p>
+            The Law of Large Numbers (LLN) is a fundamental concept in probability and statistics. It states that as the number of trials in a random experiment increases, the sample mean will converge to the expected value of the population.
+        </p>
+
+        <h2>Meaning of LLN</h2>
+        <p>
+            The meaning of the Law of Large Numbers lies in its ability to provide statistical stability and reliability to the estimation process. As we increase the sample size, the average of the sample becomes a more accurate representation of the true population mean. This statistical phenomenon underscores the idea that, in large datasets, random fluctuations tend to cancel each other out, leading to a more precise understanding of the underlying population characteristics.
+        </p>
+
+        <p>
+            In practical terms, consider a scenario where a fair six-sided die is rolled repeatedly. The Law of Large Numbers suggests that as the number of rolls increases, the average value of those rolls will converge towards the expected value of 3.5. While individual rolls may deviate from this expected value, the overall trend, as dictated by the LLN, is a convergence to the true mean with a larger sample size.
+        </p>
+        <h2>Proof of LLN</h2>
+        <p>
+            The proof of the Law of Large Numbers is a sophisticated mathematical demonstration grounded in probability theory and statistical analysis. At its core, the proof involves establishing that, as the number of independent and identically distributed random variables in a sample grows indefinitely, the sample mean converges in probability to the population mean.
+        </p>
+
+        <p>
+            One of the classical proofs employs concepts such as Chebyshev's inequality and moment-generating functions to illustrate the convergence behavior. It showcases how the variability of sample means diminishes as the sample size increases, ultimately leading to a more precise estimation of the population mean.
+        </p>
+
+        <h2>Simulations and LLN</h2>
+        <p>
+            Simulations play a crucial role in illustrating the Law of Large Numbers. Through computational models and simulations, we can observe how the average of a sample approaches the expected value as the sample size increases. This practical demonstration helps to visualize and understand the principles behind LLN.
+            As we can seen from the homework 3 exercise, where M systems are subject to a series of N attacks and on the x-axis, we indicate the attacks and on the Y-axis we
+            simulate the accumulation of a “security score” (-1, 1), where the score is -1 if the system is penetrated
+            and 1 if the system was successfully “shielded” or protected, the trajectories and the final histogram reflects the LLN behaviour.
+        </p>
+
+        <p>
+            In conclusion, the Law of Large Numbers is a cornerstone in statistics, emphasizing the stability and reliability of sample means as the sample size grows. Whether through theoretical proofs or practical simulations, LLN provides a fundamental understanding of statistical inference.
+        </p>
+    </div>
+
+    <div class="image-container">
+        <img src="file:///home/alessio/Scrivania/Universita/CyberSecurity/Statistics/thesis/th1/proof_LLN.png" alt="Proof of LLN">
+        <img src="file:///home/alessio/Scrivania/Universita/CyberSecurity/Statistics/thesis/th1/ksnip_20231115-083537.png" alt="Simulations and LLN">
+    </div>
+</body>
+</html>
