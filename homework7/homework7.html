@@ -639,7 +639,7 @@
       return [scores, cumScores, relScores, norScores];
     }
 
-    function simulateSecurityScoresGeometricBrownian(numAttacks, initialPrice = 2, drift = 0.01, volatility = 0.02) {
+    function simulateSecurityScoresGeometricBrownian(numAttacks, initialPrice = 1.1, drift = 0.01, volatility = 0.02) {
       const prices = new Array(numAttacks);
       const cumPrices = new Array(numAttacks);
       const relPrices = new Array(numAttacks);
