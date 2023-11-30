@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gaussian Distribution - Meaning, Derivations, and Simulations</title>
+    <script async src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+        }
+        .text-container {
+            width: 65%;
+            margin-right: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .image-container {
+            width: 35%;
+        }
+        .formula {
+            background-color: #f4f4f4;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-container">
+        <h1>The Gaussian Distribution</h1>
+        <p>
+            The Gaussian Distribution, also known as the Normal Distribution, is a continuous probability distribution that is symmetric around its mean, forming a bell-shaped curve. It is one of the most important and widely used distributions in statistics and probability theory.
+        </p>
+
+        <h2>Meaning of Gaussian Distribution</h2>
+        <p>
+            The Gaussian Distribution is characterized by two parameters: the mean (\( \mu \)) and the standard deviation (\( \sigma \)). The probability density function (PDF) is given by:
+        </p>
+        <div class="formula">
+            <p> \[ f(x; \mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{1}{2\sigma^2}(x-\mu)^2} \]</p>
+        </div>
+
+        <p>
+            The mean (\( \mu \)) determines the center of the distribution, while the standard deviation (\( \sigma \)) controls the spread or width of the distribution. In a standard normal distribution (with mean 0 and standard deviation 1), about 68% of the data falls within one standard deviation of the mean, 95% within two standard deviations, and 99.7% within three standard deviations.
+        </p>
+
+        <h2>Derivations of Gaussian Distribution</h2>
+        <p>
+            The Gaussian Distribution arises from the Central Limit Theorem and is derived using methods such as completing the square. The probability density function is fundamental in understanding the properties of the distribution.
+        </p>
+
+        <h2>Simulations of Gaussian Distribution</h2>
+        <p>
+            Simulations provide a practical way to understand the Gaussian Distribution. By generating random samples following a Gaussian Distribution and visualizing the results, we can observe the bell-shaped curve and the concentration of data around the mean.
+        </p>
+
+        <div class="formula">
+            <h3>Simulation: System Attacks and Security Scores</h3>
+            <p>
+                As illustrated in Homework three, where we have M systems subject to a series of N attacks, we can simulate the accumulation of a "security score" on a graph. The x-axis indicates the attacks, and the y-axis represents the accumulation of the security score, ranging from -1 (system penetration) to 1 (successful protection).
+                We can also simulate the cumulated frequency, say f, of penetration attacks.
+            </p>
+            <!-- You can add more details or images related to the simulation here -->
+        </div>
+
+        <h2>Applications</h2>
+        <p>
+            The Gaussian Distribution has numerous applications in various fields, including:
+        </p>
+        <ul>
+            <li>Statistical inference and hypothesis testing.</li>
+            <li>Finance for modeling stock prices and risk management.</li>
+            <li>Physics for describing random processes and measurement errors.</li>
+            <li>Biology for modeling natural phenomena and biological variability.</li>
+            <li>Signal processing for noise modeling.</li>
+        </ul>
+    </div>
+
+    <div class="image-container">
+        <img src="file:///home/alessio/Scrivania/Universita/CyberSecurity/Statistics/thesis/th3/gaussiandistr.jpg" alt="Meaning of Gaussian Distribution">
+        <img src="file:///home/alessio/Scrivania/Universita/CyberSecurity/Statistics/thesis/th3/ksnip_20231115-094640.png" >
+    </div>
+</body>
+</html>

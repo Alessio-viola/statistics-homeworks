@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithms for Random Variates Generation</title>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #666;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            white-space: pre-wrap;
+        }
+
+        .theorem {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Algorithms for Random Variates Generation</h1>
+    </header>
+
+    <div class="theorem">
+        <h2>Common Algorithms</h2>
+        <p>There are several algorithms for generating random variates based on different probability distributions. Some common distributions and their algorithms include:</p>
+
+        <ul>
+            <li>
+                <strong>Uniform Distribution:</strong>
+                <p>Algorithm description and implementation in JavaScript.</p>
+                <code>
+                    function generateUniformRandom() {
+                        return Math.random();
+                    }
+
+                    // Example usage
+                    const uniformRandomNumber = generateUniformRandom();
+                    console.log("Uniform Random Number:", uniformRandomNumber);
+                </code>
+            </li>
+
+            <li>
+                <strong>Normal (Gaussian) Distribution:</strong>
+                <p>Algorithm details and code snippets in JavaScript.</p>
+                <code>
+                    function generateNormalRandom(mean, stdDev) {
+                        const u1 = Math.random();
+                        const u2 = Math.random();
+
+                        const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+                        return mean + stdDev * z0;
+                    }
+
+                    // Example usage
+                    const mean = 0;
+                    const stdDev = 1;
+                    const normalRandomNumber = generateNormalRandom(mean, stdDev);
+                    console.log("Normal Random Number:", normalRandomNumber);
+                </code>
+            </li>
+
+            <li>
+                <strong>Exponential Distribution:</strong>
+                <p>Algorithm details and code snippets in JavaScript.</p>
+                <code>
+                    function generateExponentialRandom(lambda) {
+                        return -Math.log(Math.random()) / lambda;
+                    }
+
+                    // Example usage
+                    const lambda = 2;
+                    const exponentialRandomNumber = generateExponentialRandom(lambda);
+                    console.log("Exponential Random Number:", exponentialRandomNumber);
+                </code>
+            </li>
+
+            <li>
+                <strong>Poisson Distribution:</strong>
+                <p>Algorithm details and code snippets in JavaScript.</p>
+                <code>
+                    function generatePoissonRandom(lambda) {
+                        let k = 0;
+                        let p = 1;
+                        const L = Math.exp(-lambda);
+
+                        do {
+                            k++;
+                            p *= Math.random();
+                        } while (p > L);
+
+                        return k - 1;
+                    }
+
+                    // Example usage
+                    const poissonLambda = 3;
+                    const poissonRandomNumber = generatePoissonRandom(poissonLambda);
+                    console.log("Poisson Random Number:", poissonRandomNumber);
+                </code>
+            </li>
+
+            <li>
+                <strong>Binomial Distribution:</strong>
+                <p>Algorithm details and code snippets in JavaScript.</p>
+                <code>
+                    function generateBinomialRandom(n, p) {
+                        let x = 0;
+
+                        for (let i = 0; i < n; i++) {
+                            if (Math.random() < p) {
+                                x++;
+                            }
+                        }
+
+                        return x;
+                    }
+
+                    // Example usage
+                    const binomialN = 5;
+                    const binomialP = 0.5;
+                    const binomialRandomNumber = generateBinomialRandom(binomialN, binomialP);
+                    console.log("Binomial Random Number:", binomialRandomNumber);
+                </code>
+            </li>
+        </ul>
+    </div>
+
+    <h1 align="center">Methods</h1>
+
+    <div class="theorem">
+        <h2>Inverse Transform Method</h2>
+        <p>
+            The Inverse Transform method is a common technique for generating random variates from a given probability distribution function. It involves using the inverse of the cumulative distribution function (CDF) to transform uniformly distributed random numbers into variates following the desired distribution.
+        </p>
+        <p>
+            For the Exponential Distribution, the cumulative distribution function (CDF) is given by:
+        </p>
+        <p>
+            \[ F(x) = 1 - e^{-\lambda x} \]
+        </p>
+        <p>
+            To find the Inverse Transform, we solve for \( x \) in terms of \( u \), where \( u \) is a uniform random number between 0 and 1:
+        </p>
+        <p>
+            \[ u = 1 - e^{-\lambda x} \]
+        </p>
+        <p>
+            Now, solve for \( x \):
+        </p>
+        <p>
+            \[ e^{-\lambda x} = 1 - u \]
+        </p>
+        <p>
+            \[ -\lambda x = \ln(1 - u) \]
+        </p>
+        <p>
+            \[ x = -\frac{\ln(1 - u)}{\lambda} \]
+        </p>
+        <p>
+            So, the Inverse Transform for the Exponential Distribution is:
+        </p>
+        <p>
+            \[ F^{-1}(u) = -\frac{\ln(1 - u)}{\lambda} \]
+        </p>
+        <p>
+            This method provides a flexible and widely applicable approach to transforming uniform random variates into variates following the desired distribution and also generating random variates from various distributions.
+        </p>
+    </div>
+    
+    <div class="theorem">
+        <h2>Composition</h2>
+    </div>
+
+    <div class="theorem">
+        <h2>Convolution</h2>
+    </div>
+
+    <div class="theorem">
+        <h2>Acceptance-Rejection Method</h2>
+        <p>
+            The Acceptance-Rejection method is a technique used for generating random variates from a target distribution by comparing them with variates from a simpler distribution. The basic idea is to generate a candidate variate from a simple distribution and accept or reject it based on a comparison with the target distribution.
+        </p>
+        <p>
+            This method involves two key components:
+        </p>
+        <ol>
+            <li>
+                Generation of random variates from a proposal distribution.
+            </li>
+            <li>
+                Acceptance or rejection of the generated variates based on a comparison with the target distribution.
+            </li>
+        </ol>
+        <p>
+            Example implementation in JavaScript:
+        </p>
+        <code>
+            <img src="./accept_reject_sampling.png" align="right">
+            function acceptanceRejection(targetPDF, proposalPDF) {
+                let x;
+
+                do {
+                    // Generate a candidate variate from the proposal distribution
+                    x = generateProposalVariate();
+
+                    // Generate a random number between 0 and 1
+                    const u = Math.random();
+
+                    // Compare the target and proposal distributions
+                    if (u <= targetPDF(x) / (M * proposalPDF(x))) {
+                        return x; // Accept the variate
+                    }
+
+                    // Reject the variate and repeat the process
+                } while (true);
+            }
+
+            // Example usage
+            const targetPDF = (x) => /* define the PDF of the target distribution */;
+            const proposalPDF = (x) => /* define the PDF of the proposal distribution */;
+            const acceptedVariate = acceptanceRejection(targetPDF, proposalPDF);
+            console.log("Accepted Variate:", acceptedVariate);
+        </code>
+    </div>
+
+
+    <div class="theorem">
+        <h2>Special Properties</h2>
+    </div>
+
+</body>
+
+</html>

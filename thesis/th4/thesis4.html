@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glivenko-Cantelli Theorem</title>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .theorem {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>The Glivenko-Cantelli Theorem</h1>
+
+    <div class="theorem">
+        <h2>Theorem Statement:</h2>
+        <p>
+            The Glivenko-Cantelli theorem states that for any distribution function \( F \), the cumulative distribution
+            function (CDF) of the empirical distribution function (EDF) converges uniformly to \( F \).
+        </p>
+        <p>
+            Mathematically, if \( F_n \) is the EDF based on \( n \) independent and identically distributed samples,
+            then
+            \[
+            \sup_x |F_n(x) - F(x)| \rightarrow 0 \text{ as } n \rightarrow \infty.
+            \]
+        </p>
+    </div>
+
+    <div class="theorem">
+        <h2>Proof:</h2>
+        <p>
+            The Glivenko-Cantelli theorem can be proved using techniques from mathematical statistics. Let's outline the
+            key
+            steps of the proof.
+        </p>
+    
+        <p><img src="./ksnip_20231116-085409.png"></p>
+    </div>
+    
+
+    <div class="theorem">
+        <h2>Simulations:</h2>
+        <p>
+            Simulations can be conducted to illustrate the Glivenko-Cantelli theorem in action. I used R to generate random samples and compare the empirical
+            distribution function with the true distribution function.
+        </p>
+        <p><img src="output_image.jpg" alt="Empirical Distribution Function Plot"></p>
+        <p>
+            In the following code I generate three random samples from normal distributions with different sizes, compute empirical distribution functions (EDFs) for each sample, and create a plot comparing the EDFs to the theoretical normal distribution.
+        </p>
+        <pre>
+            <code>
+                # R code for simulation
+                set.seed(123)
+                
+                n1 <- 1000
+                n2 <- 100
+                n3 <- 50  
+                
+                sample_data1 <- rnorm(n1)
+                sample_data2 <- rnorm(n2)
+                sample_data3 <- rnorm(n3)
+                
+                edf1 <- ecdf(sample_data1)
+                edf2 <- ecdf(sample_data2)
+                edf3 <- ecdf(sample_data3)
+                
+                # Plotting
+                jpeg("output_image.jpg", width = 800, height = 600)  # Specifica il nome del file e le dimensioni desiderate
+                
+                plot(edf1, main="Empirical Distribution Function vs True Distribution Function", col="blue", lwd=2, ylim=c(0, 1))
+                lines(edf2, col="green", lwd=2)
+                lines(edf3, col="purple", lwd=2)
+                curve(pnorm(x), add=TRUE, col="red", lwd=2)
+                legend("topleft", legend=c("1000 samples", "100 samples", "50 samples","True Distribution Function"), col=c("blue", "green", "purple", "red"), lwd=2)
+                
+                dev.off()  # Chiudi il dispositivo grafico
+                
+            </code>
+        </pre>
+    </div>
+    
+</body>
+
+</html>
