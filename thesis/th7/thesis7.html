@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Algorithms (Data Streams) Ideas and Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #666;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            white-space: pre-wrap;
+        }
+
+        .theorem {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Online Algorithms (Data Streams) Ideas and Code</h1>
+    </header>
+
+    <div class="theorem">
+        <h2>What is a Data Stream?</h2>
+        <p>A data stream is an unbounded sequence of data elements that are continuously generated and made available over time. This constant flow distinguishes data streams from traditional datasets, which are finite and can fit into memory.</p>
+        <p>Data streams pose challenges due to their potentially infinite size and the need to process elements in real-time or with limited resources. The continuous nature of data streams requires algorithms to adapt and make decisions on the fly as new data arrives, emphasizing the importance of real-time or near real-time processing.</p>
+        <p>Examples of data streams encompass a wide range of sources, including live sensor data from devices, social media feeds with real-time updates, continuous financial transactions, and the constant flow of network traffic in dynamic environments. These streams demand specialized algorithms known as online algorithms, designed to efficiently process data by dynamically adjusting to changing conditions and effectively utilizing limited computational resources.</p>
+        <p>Online algorithms play a crucial role in scenarios where it is impractical or impossible to store the entire dataset in memory due to the continuous and potentially infinite nature of data streams. These algorithms are adept at handling the dynamic and resource-constrained characteristics of data streams, making them invaluable in various domains.</p>
+    </div>
+    
+
+    <div class="theorem">
+        <h2>Counting Elements in a Stream</h2>
+        <p>The Counting Elements in a Stream algorithm is used to count the occurrences of elements in a data stream.</p>
+
+        <code>
+            const elementCounts = {};
+
+            function countElementsInStream(element) {
+                if (!elementCounts[element]) {
+                    elementCounts[element] = 1;
+                } else {
+                    elementCounts[element]++;
+                }
+            }
+
+            // Usage example
+            countElementsInStream("A");
+            countElementsInStream("B");
+            countElementsInStream("A");
+
+            console.log(elementCounts); // Output: { A: 2, B: 1 }
+        </code>
+    </div>
+
+    <div class="theorem">
+        <h2>Finding the Top k Elements</h2>
+        <p>The Finding the Top k Elements algorithm is used to identify the k most frequent elements in a data stream.</p>
+
+        <code>
+            class TopKFinder {
+                constructor(k) {
+                    this.k = k;
+                    this.elementCounts = {};
+                    this.minHeap = [];
+                }
+
+                updateElementCounts(element) {
+                    if (!this.elementCounts[element]) {
+                        this.elementCounts[element] = 1;
+                    } else {
+                        this.elementCounts[element]++;
+                    }
+                }
+
+                findTopKElements(element) {
+                    this.updateElementCounts(element);
+
+                    if (!(element in this.minHeap) || this.elementCounts[element] > this.minHeap[0].count) {
+                        this.minHeap.push({ element, count: this.elementCounts[element] });
+
+                        if (this.minHeap.length > this.k) {
+                            this.minHeap.sort((a, b) => a.count - b.count).shift();
+                        }
+                    }
+                }
+
+                getTopKElements() {
+                    return this.minHeap.map(item => item.element);
+                }
+            }
+
+            // Usage example
+            const topKFinder = new TopKFinder(2);
+            topKFinder.findTopKElements("A");
+            topKFinder.findTopKElements("B");
+            topKFinder.findTopKElements("A");
+
+            console.log(topKFinder.getTopKElements()); // Output: [ "A", "B" ]
+        </code>
+    </div>
+
+    <div class="theorem">
+        <h2>Calculating the Moving Average</h2>
+        <p>The Calculating the Moving Average algorithm is used to compute the average of a set of numbers over a sliding window in a data stream.</p>
+
+        <code>
+            class MovingAverageCalculator {
+                constructor(windowSize) {
+                    this.windowSize = windowSize;
+                    this.elementQueue = [];
+                    this.elementSum = 0;
+                }
+
+                addElementToQueue(element) {
+                    this.elementQueue.push(element);
+                    this.elementSum += element;
+
+                    if (this.elementQueue.length > this.windowSize) {
+                        const removedElement = this.elementQueue.shift();
+                        this.elementSum -= removedElement;
+                    }
+                }
+
+                calculateMovingAverage() {
+                    return this.elementSum / this.elementQueue.length;
+                }
+            }
+
+            // Usage example
+            const movingAverageCalculator = new MovingAverageCalculator(3);
+            movingAverageCalculator.addElementToQueue(5);
+            movingAverageCalculator.addElementToQueue(10);
+            movingAverageCalculator.addElementToQueue(15);
+
+            console.log(movingAverageCalculator.calculateMovingAverage()); // Output: 10
+        </code>
+    </div>
+
+</body>
+
+</html>
