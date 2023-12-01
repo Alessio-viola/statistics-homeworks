@@ -69,39 +69,7 @@
             distribution function with the true distribution function.
         </p>
         <p><img src="https://alessio-viola.github.io/statistics-homeworks/thesis/th4/output_image.jpg" alt="Empirical Distribution Function Plot"></p>
-        <p>
-            In the following code I generate three random samples from normal distributions with different sizes, compute empirical distribution functions (EDFs) for each sample, and create a plot comparing the EDFs to the theoretical normal distribution.
-        </p>
-        <pre>
-            <code>
-                # R code for simulation
-                set.seed(123)
-                
-                n1 <- 1000
-                n2 <- 100
-                n3 <- 50  
-                
-                sample_data1 <- rnorm(n1)
-                sample_data2 <- rnorm(n2)
-                sample_data3 <- rnorm(n3)
-                
-                edf1 <- ecdf(sample_data1)
-                edf2 <- ecdf(sample_data2)
-                edf3 <- ecdf(sample_data3)
-                
-                # Plotting
-                jpeg("output_image.jpg", width = 800, height = 600)  # Specifica il nome del file e le dimensioni desiderate
-                
-                plot(edf1, main="Empirical Distribution Function vs True Distribution Function", col="blue", lwd=2, ylim=c(0, 1))
-                lines(edf2, col="green", lwd=2)
-                lines(edf3, col="purple", lwd=2)
-                curve(pnorm(x), add=TRUE, col="red", lwd=2)
-                legend("topleft", legend=c("1000 samples", "100 samples", "50 samples","True Distribution Function"), col=c("blue", "green", "purple", "red"), lwd=2)
-                
-                dev.off()  # Chiudi il dispositivo grafico
-                
-            </code>
-        </pre>
+        
     </div>
     
 </body>
