@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stochastic Processes and SDEs</title>
+    <style>
+        /* Stili CSS rimangono invariati */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        p ,li {
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .theorem {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        code, img {
+            height: 50%;
+            width: 100%;
+            display: block;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .flex-container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
+
+    .section {
+        margin-right: 10px;
+        width: 50%;
+        height: 50%;
+    }
+
+    
+.section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Mantiene l'aspetto dell'immagine senza deformazioni */
+    max-width: 100%; /* Impedisce che l'immagine superi la larghezza della sua area contenitore */
+}
+#birth {
+    width: 40%;
+    height: 50%;
+}
+.container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Stile per la colonna dell'immagine */
+    .image-column {
+      width: 50%;
+      margin-right: 20px; /* Aggiunge un margine a destra per separare le colonne */
+    }
+
+    /* Stile per la colonna della spiegazione */
+    .text-column {
+      flex: 2; /* Occupa lo spazio disponibile, il doppio rispetto all'immagine */
+    }
+
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Stochastic Processes and SDEs</h1>
+    </header>
+
+    <div class="theorem">
+        <h2>Introduction</h2>
+        <p>Stochastic processes are mathematical models used to describe the evolution of a system over time in a probabilistic manner. They play a crucial role in various fields, including finance, physics, biology, and more. Stochastic Differential Equations (SDEs) are differential equations driven by stochastic processes, providing a powerful framework for modeling random phenomena.</p>
+        <p>There are two main types of SDEs: ordinary and partial. Ordinary SDEs have only one independent variable, usually time, and one or more dependent variables, such as the state of the system. Partial SDEs have more than one independent variable, such as space and time, and one dependent variable, such as the temperature or concentration of a substance. Depending on the nature of the stochastic term, SDEs can also be classified as additive or multiplicative, linear or nonlinear, and scalar or vector.</p>
+        <p>SDEs combine determinism and randomness, with the deterministic part representing the expected behavior, and the stochastic part capturing the inherent uncertainty or randomness in the system.</p>
+        <a href="./../../homework7/homework7.html" target="_blank">Click here to see my page where are implemented a lot of SDEs</a>
+    </div>
+    
+    <div class="theorem">
+        <p>
+            The general form of a one-dimensional SDE is given by:
+            <br>
+            \[ dX_t = a(t, X_t) \, dt + b(t, X_t) \, dW_t \]
+            <br>
+            where:<br>- \(X_t\) is the process,<br>- \(a(t, X_t)\) and \(b(t, X_t)\) are deterministic functions,<br>
+            - \(dt\) represents the deterministic part <br>- \(dW_t\) represents the random part (Brownian motion).
+        </p>
+    </div>
+    
+    <br><br><br><br><br><br>
+    <div class="theorem">
+        <h2>Properties of Stochastic Differential Equations (SDEs)</h2>
+        <p>SDEs exhibit several important properties:</p>
+        <ul>
+            <li><strong>Markov Property:</strong> SDEs satisfy the Markov property, meaning that the future evolution of the system depends only on its current state and is independent of its past history given the present state.</li>
+            <li><strong>Continuous Paths:</strong> SDEs have continuous sample paths, which means that the trajectories of the process are continuous functions of time.</li>
+            <li><strong>Ito's Lemma:</strong> Ito's Lemma is a key result used for deriving solutions to SDEs. It relates the differential changes in a function of the stochastic process to the changes in the process itself.</li>
+            <li><strong>Martingale Property:</strong> Under certain conditions, SDEs can exhibit the martingale property, where the expected value of the process at a future time is equal to its present value.</li>
+        </ul>
+    </div>
+
+    <div class="theorem">
+        <h2>Birth-Death Process</h2>
+        <p>First of all, I want to analyze this process because it intrigued me. The birth–death process is a special case of a continuous-time Markov process where the state transitions are of only two types: "births," which increase the state variable by one, and "deaths," which decrease the state by one. The model's name comes from a common application, the use of such models to represent the current size of a population where the transitions are literal births and deaths. How does it work?</p>
+        <div align="center"><img id="birth" src="./ksnip_20231130-161051.png"></div>
+        <p>Mathematical Equation: <br>
+            <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline" style="margin: auto;">
+                <mrow>
+                    <mi>dP</mi><sub>n</sub>
+                    <mo>/</mo>
+                    <mi>dt</mi>
+                    <mo>=</mo>
+                    <mi>λ</mi><sub>n-1</sub><mi>P</mi><sub>n-1</sub>
+                    <mo>-</mo>
+                    <mo>(</mo>
+                    <mi>λ</mi><sub>n</sub>
+                    <mo>+</mo>
+                    <mi>μ</mi><sub>n</sub>
+                    <mo>)</mo>
+                    <mi>P</mi><sub>n</sub>
+                    <mo>+</mo>
+                    <mi>μ</mi><sub>n+1</sub>
+                    <mi>P</mi><sub>n+1</sub>
+                </mrow>
+            </math>
+        </p>
+        
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>P<sub>n</sub></em>: Probability that the population has size <em>n</em>.</li>
+            <li><em>λ<sub>n</sub></em>: Birth rate when the population is of size <em>n</em>.</li>
+            <li><em>μ<sub>n</sub></em>: Death rate when the population is of size <em>n</em>.</li>
+        </ul>
+        <p>As the name suggests, the birth-death process is utilized in :</p>
+        <ul>
+            <li>Population Biology: to model changes in population sizes over time. In this context, "births" represent new individuals entering the population, and "deaths" represent individuals leaving the population.</li>
+            <li>Queueing Theory: to model the behavior of systems with queues, such as telecommunications networks or computer systems. In queueing theory, "births" correspond to the arrival of new entities, and "deaths" correspond to the departure or service completion of entities.</li>
+            <li>Epidemiology: to model the spread of infectious diseases within a population. "Births" may represent new infections, and "deaths" may represent the recovery or death of infected individuals.</li>
+            <li>Chemistry and Physics: to model certain physical systems. For example, in radioactive decay, the birth-death process can model the creation (birth) and decay (death) of radioactive atoms.</li>
+        </ul>
+        <p>Now I will show the code of the function that manages this process (with the description on the right) and then I will show the related charts.</p>
+        
+        <div class="container">
+            <div class="image-column">
+              <img src="./birth_death/ksnip_20231201-164405.png" alt="">
+            </div>
+            <div class="text-column">
+              <p>The function is used to simulate one system. In the code is initialized arrays to store population sizes, cumulative sizes, relative sizes, and normalized sizes. It then iterates through each generation, calculating birth and death rates based on the current population size, simulating birth and death events using a Poisson distribution, and updating population size accordingly. Data for each generation, including population size, cumulative size, relative size, and normalized size, is saved in corresponding arrays. The function returns an array containing these arrays for visualization.</p>
+            </div>
+          </div>
+        <br><br><br><br><br><br><br><br>
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./birth_death/ksnip_20231201-164603.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./birth_death/ksnip_20231201-164651.png" alt="Image 2">
+            </div>
+        
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./birth_death/ksnip_20231201-164738.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./birth_death/ksnip_20231201-164807.png" alt="Image 4">
+            </div>
+        </div>
+
+    </div>
+    
+
+
+    <!-- Sezione per Arithmetic Brownian -->
+    <div class="theorem">
+        <h2>Arithmetic Brownian Motion</h2>
+        <p>Arithmetic Brownian Motion is a stochastic process where the increments are normally distributed. It is characterized by a constant drift (<em>μ</em>) and volatility (<em>σ</em>). This process is widely used in finance for modeling asset prices.</p>
+        <p>Mathematical Equation: <br> <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mi>dX</mi>
+                <mo>=</mo>
+                <mi>μ</mi>
+                <mi>dt</mi>
+                <mo>+</mo>
+                <mi>σ</mi>
+                <mi>dW</mi>
+            </math></p>
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>μ</em>: Constant drift, represents the expected growth rate.</li>
+            <li><em>σ</em>: Volatility, represents the standard deviation of the random fluctuations.</li>
+            <li><em>dW</em>: Wiener process (Brownian motion) increment.</li>
+        </ul>
+
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./arithmeticBrownian/ksnip_20231130-105159.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./arithmeticBrownian/ksnip_20231130-105234.png" alt="Image 2">
+            </div>
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./arithmeticBrownian/ksnip_20231130-105323.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./arithmeticBrownian/ksnip_20231130-105416.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+
+    <br><br><br><br>
+    <!-- Sezione per Geometric Brownian Motion (Black–Scholes) -->
+    <div class="theorem">
+        <h2>Geometric Brownian Motion (Black–Scholes)</h2>
+        <p>Geometric Brownian Motion is a key model in finance, particularly in the Black–Scholes option pricing model. It includes a drift term (<em>μ</em>) and a volatility term (<em>σ</em>), leading to log-normal distributed increments. This process is commonly used to model the dynamics of stock prices.</p>
+        <p>Mathematical Equation: <br> <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mi>dX</mi>
+                <mo>=</mo>
+                <mi>μX</mi>
+                <mi>dt</mi>
+                <mo>+</mo>
+                <mi>σX</mi>
+                <mi>dW</mi>
+            </math></p>
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>μ</em>: Drift term, represents the expected growth rate.</li>
+            <li><em>σ</em>: Volatility term, represents the standard deviation of the random fluctuations.</li>
+            <li><em>dW</em>: Wiener process (Brownian motion) increment.</li>
+        </ul>
+
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./geometricBrownian/ksnip_20231130-115554.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./geometricBrownian/ksnip_20231130-115640.png" alt="Image 2">
+            </div>
+        
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./geometricBrownian/ksnip_20231130-115739.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./geometricBrownian/ksnip_20231130-115809.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <!-- Sezione per Ornstein–Uhlenbeck (mean-reverting) -->
+    <div class="theorem">
+        <h2>Ornstein–Uhlenbeck (Mean-Reverting)</h2>
+        <p>Ornstein–Uhlenbeck process is a mean-reverting stochastic process widely used in finance. It is characterized by a mean level (<em>θ</em>), a speed of reversion to the mean (<em>κ</em>), and volatility (<em>σ</em>).</p>
+        <p>Mathematical Equation: <br> <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mi>dX</mi>
+                <mo>=</mo>
+                <mi>κ(θ - X)</mi>
+                <mi>dt</mi>
+                <mo>+</mo>
+                <mi>σ</mi>
+                <mi>dW</mi>
+            </math></p>
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>θ</em>: Mean level, represents the long-term average of the process.</li>
+            <li><em>κ</em>: Speed of reversion to the mean, represents how quickly the process reverts to the mean.</li>
+            <li><em>σ</em>: Volatility, represents the standard deviation of the random fluctuations.</li>
+            <li><em>dW</em>: Wiener process (Brownian motion) increment.</li>
+        </ul>
+        <p>Utilized in finance for modeling interest rates and other mean-reverting processes.</p>
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./ornstein/ksnip_20231130-122606.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./ornstein/ksnip_20231130-122656.png" alt="Image 2">
+            </div>
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./ornstein/ksnip_20231130-122726.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./ornstein/ksnip_20231130-122807.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+     
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <!-- Sezione per Vasicek -->
+    <div class="theorem">
+        <h2>Vasicek</h2>
+        <p>Vasicek model is a stochastic process used for interest rate modeling. It is characterized by a mean level (<em>θ</em>), a speed of reversion to the mean (<em>κ</em>), and volatility (<em>σ</em>).</p>
+        <p>Mathematical Equation: <br> <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mi>dX</mi>
+                <mo>=</mo>
+                <mi>κ(θ - X)</mi>
+                <mi>dt</mi>
+                <mo>+</mo>
+                <mi>σ</mi>
+                <mi>dW</mi>
+            </math></p>
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>θ</em>: Mean level, represents the long-term average of the process.</li>
+            <li><em>κ</em>: Speed of reversion to the mean, represents how quickly the process reverts to the mean.</li>
+            <li><em>σ</em>: Volatility, represents the standard deviation of the random fluctuations.</li>
+            <li><em>dW</em>: Wiener process (Brownian motion) increment.</li>
+        </ul>
+
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./vasicek/ksnip_20231130-123623.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./vasicek/ksnip_20231130-123704.png" alt="Image 2">
+            </div>
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./vasicek/ksnip_20231130-123738.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./vasicek/ksnip_20231130-123818.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+
+    <!-- Sezione per Hull–White -->
+    <div class="theorem">
+        <h2>Hull–White</h2>
+        <p>Hull–White model is a stochastic process used for interest rate modeling. It extends the Vasicek model by allowing the speed of reversion to the mean to be a function of time.</p>
+        <p>Mathematical Equation: <br> <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mi>dX</mi>
+                <mo>=</mo>
+                <mi>(θ(t) - X)</mi>
+                <mi>dt</mi>
+                <mo>+</mo>
+                <mi>σ</mi>
+                <mi>dW</mi>
+            </math></p>
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>θ(t)</em>: Mean level as a function of time, allowing for time-varying mean.</li>
+            <li><em>σ</em>: Volatility, represents the standard deviation of the random fluctuations.</li>
+            <li><em>dW</em>: Wiener process (Brownian motion) increment.</li>
+        </ul>
+        
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./hull_white/ksnip_20231130-124229.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./hull_white/ksnip_20231130-124304.png" alt="Image 2">
+            </div>
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./hull_white/ksnip_20231130-124340.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./hull_white/ksnip_20231130-124431.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+
+    <!-- Sezione per Cox-Ingersoll-Ross -->
+    <div class="theorem">
+        <h2>Cox-Ingersoll-Ross</h2>
+        <p>The Cox-Ingersoll-Ross (CIR) model is a stochastic process commonly used in interest rate modeling. It is an extension of the Vasicek model, introducing a mean-reverting square root process.</p>
+        <p>Mathematical Equation: <br> <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mi>dX</mi>
+                <mo>=</mo>
+                <mi>κ(θ - X)</mi>
+                <mi>dt</mi>
+                <mo>+</mo>
+                <mi>σ</mi>
+                <msqrt>
+                    <mo>(</mo>
+                    <mi>X</mi>
+                    <mo>)</mo>
+                </msqrt>
+                <mi>dW</mi>
+            </math></p>
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>θ</em>: Mean level, represents the long-term average of the process.</li>
+            <li><em>κ</em>: Speed of reversion to the mean, represents how quickly the process reverts to the mean.</li>
+            <li><em>σ</em>: Volatility, represents the standard deviation of the random fluctuations.</li>
+            <li><em>dW</em>: Wiener process (Brownian motion) increment.</li>
+        </ul>
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./cox/ksnip_20231130-142448.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./cox/ksnip_20231130-142527.png" alt="Image 2">
+            </div>
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./cox/ksnip_20231130-142615.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./cox/ksnip_20231130-142656.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+
+    <!-- Sezione per Black-Karasinski -->
+    <div class="theorem">
+        <h2>Black-Karasinski</h2>
+        <p>The Black-Karasinski model is an extension of the Vasicek model used for interest rate modeling. It allows for the stochastic variation of volatility over time.</p>
+        <p>Mathematical Equation: <br> <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+                <mi>dX</mi>
+                <mo>=</mo>
+                <mi>κ(θ - X)</mi>
+                <mi>dt</mi>
+                <mo>+</mo>
+                <mi>σ(t)</mi>
+                <mi>dW</mi>
+            </math></p>
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>θ</em>: Mean level, represents the long-term average of the process.</li>
+            <li><em>κ</em>: Speed of reversion to the mean, represents how quickly the process reverts to the mean.</li>
+            <li><em>σ(t)</em>: Stochastic volatility, represents the instantaneous volatility that can vary over time.</li>
+            <li><em>dW</em>: Wiener process (Brownian motion) increment.</li>
+        </ul>
+        
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./black/ksnip_20231130-145535.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./black/ksnip_20231130-145610.png" alt="Image 2">
+            </div>
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./black/ksnip_20231130-145642.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./black/ksnip_20231130-145713.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+
+    <!-- Sezione per Heston -->
+    <div class="theorem">
+        <h2>Heston Model</h2>
+        <p>The Heston model is widely used in financial mathematics to model asset prices, considering stochastic volatility. It is particularly useful in options pricing.</p>
+        <p>Mathematical Equations:</p>
+        <div xmlns="http://www.w3.org/1998/Math/MathML" class="equation">
+            <math display="block">
+                <mrow>
+                    <mi>dS</mi>
+                    <mo>=</mo>
+                    <mi>μS</mi>
+                    <mi>dt</mi>
+                    <mo>+</mo>
+                    <msqrt>
+                        <mrow>
+                            <mi>v</mi>
+                        </mrow>
+                    </msqrt>
+                    <mi>S</mi>
+                    <mi>dW₁</mi>
+                </mrow>
+            </math>
+        </div>
+        <div xmlns="http://www.w3.org/1998/Math/MathML" class="equation">
+            <math display="block">
+                <mrow>
+                    <mi>dv</mi>
+                    <mo>=</mo>
+                    <mi>κ(θ - v)</mi>
+                    <mi>dt</mi>
+                    <mo>+</mo>
+                    <mi>σ</mi>
+                    <msqrt>
+                        <mi>v</mi>
+                    </msqrt>
+                    <mi>dW₂</mi>
+                </mrow>
+            </math>
+        </div>
+        <p>Equation Details:</p>
+        <ul>
+            <li><em>S</em>: Asset price.</li>
+            <li><em>μ</em>: Drift rate.</li>
+            <li><em>v</em>: Volatility of the Heston process.</li>
+            <li><em>κ</em>: Speed of mean reversion for volatility.</li>
+            <li><em>θ</em>: Long-term average volatility.</li>
+            <li><em>σ</em>: Volatility of volatility.</li>
+            <li><em>dW₁</em>, <em>dW₂</em>: Wiener process (Brownian motion) increments.</li>
+        </ul>
+
+        <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./heston/ksnip_20231130-150438.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./heston/ksnip_20231130-150533.png" alt="Image 2">
+            </div>
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./heston/ksnip_20231130-150626.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./heston/ksnip_20231130-150722.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+
+    <!-- Section for Chen Model -->
+    <div class="theorem">
+        <h2>Chen Model</h2>
+        <p>The Chen model is a more complex stochastic volatility model that considers both jumps and continuous-time processes in the volatility equation.</p>
+        <p>Mathematical Equation:</p>
+        <div align="center">
+            \( dX_t = (\mu - \lambda X_t) \, dt + \sigma \sqrt{X_t} \, dW_t + dJ_t \)
+        </div>
+        <p>Equation Details:</p>
+        <ul>
+            <li>\(X_t\): Volatility of the asset at time \(t\).</li>
+            <li>\(\mu\): Average growth rate.</li>
+            <li>\(\lambda\): Mean-reverting speed.</li>
+            <li>\(\sigma\): Volatility of the process.</li>
+            <li>dW_t: Wiener process.</li>
+            <li>dJ_t: Jump process.</li>
+        </ul>
+       <p>Utilized in finance for modeling financial derivatives by incorporating stochastic volatility.</p>
+       <br><br><br><br><br><br> 
+       <div class="flex-container">
+            <div class="section">
+                <h4 align="center">Chart</h4>
+                <img src="./chen/ksnip_20231130-151308.png" alt="Image 1">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Cumulative Chart</h4>
+                <img src="./chen/ksnip_20231130-151406.png" alt="Image 2">
+            </div>
+            <div class="section">
+                <h4 align="center">Relative Chart</h4>
+                <img src="./chen/ksnip_20231130-151436.png" alt="Image 3">
+            </div>
+    
+            <div class="section">
+                <h4 align="center">Normalized Chart</h4>
+                <img src="./chen/ksnip_20231130-151508.png" alt="Image 4">
+            </div>
+        </div>
+    </div>
+    
+    <div class="theorem">
+      <h2>Bibliography</h2>
+      <p>
+        <ul>
+            <li><a href="https://quantpie.co.uk/SDEs/Arithemtic_Brownian_summary.php">https://quantpie.co.uk/SDEs/Arithemtic_Brownian_summary.php</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Geometric_Brownian_motion">https://en.wikipedia.org/wiki/Geometric_Brownian_motion</a></li>
+            <li><a href="https://www.linkedin.com/advice/0/what-some-common-types-properties-sdes#types-of-sdes">https://www.linkedin.com/advice/0/what-some-common-types-properties-sdes#types-of-sdes</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Birth%E2%80%93death_process">https://en.wikipedia.org/wiki/Birth%E2%80%93death_process</a></li>
+        </ul>
+      </p>
+    </div>
+
+
+    <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</body>
+
+</html>
