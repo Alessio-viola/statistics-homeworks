@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <title>Glivenko-Cantelli Theorem Visualization</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+  <canvas id="myChart" width="400" height="400"></canvas>
+
+
+  <script>
+
+    function generateData(sampleSize) {
+
+      let data = [];
+
+      for (let i = 0; i < sampleSize; i++) {
+
+        data.push(Math.random() * 10); // Dati generati casualmente in un intervallo da 0 a 10
+
+      }
+
+      return data;
+
+    }
+
+    function empiricalDistribution(data, x) {
+
+      let count = 0;
+
+      for (let i = 0; i < data.length; i++) {
+
+        if (data[i] <= x) {
+
+          count++;
+
+        }
+
+      }
+
+      return count / data.length;
+
+    }
+
+    let sampleSize = 50;
+
+    let dataset = generateData(sampleSize);
+
+    let empiricalData = [];
+
+    for (let i = 0; i < dataset.length; i++) {
+
+      empiricalData.push({ x: dataset[i], y: empiricalDistribution(dataset, dataset[i]) });
+
+    }
+
+    empiricalData.sort((a, b) => a.x - b.x);
+
+
+    let ctx = document.getElementById('myChart').getContext('2d');
+
+    let myChart = new Chart(ctx, {
+
+      type: 'line',
+
+      data: {
+
+        datasets: [{
+
+          label: 'Empirical Distribution',
+
+          data: empiricalData,
+
+          borderColor: 'blue',
+
+          borderWidth: 1,
+
+          fill: false
+
+        }]
+
+      },
+
+      options: {
+
+        scales: {
+
+          x: {
+
+            type: 'linear',
+
+            position: 'bottom'
+
+          },
+
+          y: {
+
+            type: 'linear'
+
+          }
+
+        }
+
+      }
+
+    });
+
+  </script>
+
+</body>
+
+</html>

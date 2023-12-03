@@ -1147,6 +1147,44 @@
     }
 
 
+    function simulateChineseRestaurantProcess(numSteps, concentrationParameter = 1) {
+      const tables = [];
+
+      for (let step = 1; step <= numSteps; step++) {
+        const tableProbabilities = tables.map((count) => count / (concentrationParameter + step - 1));
+        const newTableProbability = 1 / (concentrationParameter + step - 1);
+
+        const probabilities = [...tableProbabilities, newTableProbability];
+        const selectedTable = selectTable(probabilities);
+
+        if (selectedTable < tables.length) {
+          // Assign to an existing table
+          tables[selectedTable]++;
+        } else {
+          // Create a new table
+          tables.push(1);
+        }
+      }
+
+      return tables;
+    }
+
+    // Helper function to select a table based on probabilities
+    function selectTable(probabilities) {
+      const rand = Math.random();
+      let cumulativeProbability = 0;
+
+      for (let i = 0; i < probabilities.length; i++) {
+        cumulativeProbability += probabilities[i];
+        if (rand < cumulativeProbability) {
+          return i;
+        }
+      }
+
+      // This should not happen, but just in case
+      return probabilities.length - 1;
+    }
+
     // Function to simulate security scores for a single system
     function simulateSecurityScores(numAttacks, p = 0.5) {
       const scores = [];
