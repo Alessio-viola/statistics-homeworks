@@ -92,6 +92,7 @@
       <option value="chenModel">Chen Model</option>
       <option value="milstein">Arithmetic Brownian Motion with Milstein correction</option>
       <option value="RungeKutta">Arithmetic Brownian Motion with Runge-Kutta correction</option>
+      <option value="BirthDeathProcess">Birth-Death Process</option>
     </select>
   </div>
 
@@ -462,7 +463,23 @@
                 stdScores.push(systemNorScores)
                 }
             break;
+            case "BirthDeathProcess":
+              for (let i = 0; i < numSystems; i++) {
+                let all_scores = simulateBirthDeathProcess(numAttacks);
 
+                const systemScores = all_scores[0];
+                scores.push(systemScores);
+
+                const systemCumScores = all_scores[1];
+                cumulativeScores.push(systemCumScores)
+
+                const systemRelScores = all_scores[2]
+                relScores.push(systemRelScores)
+
+                const systemNorScores = all_scores[3];
+                stdScores.push(systemNorScores)
+                }
+            break;
         default:
           // Handle default case
           break;
@@ -601,6 +618,58 @@
       }
 
       return counters;
+    }
+
+    function simulateBirthDeathProcess(numGenerations) {
+      
+      const populationSizes = [];
+      const cumSizes = []; //cumulative sizes  
+      const relSizes = []; //relative sizes
+      const norSizes = []; //normalized sizes
+
+      let populationSize = 5; // Iniziamo con una popolazione di dimensione 5
+      let cumulativeSize = 5; 
+
+      for (let generation = 1; generation <= numGenerations; generation++) {
+        // Definiamo i tassi di nascita e morte in base alla dimensione corrente della popolazione
+        const currentBirthRate = 0.1 * populationSize;
+        const currentDeathRate = 0.1 * populationSize;
+
+        // Simuliamo gli eventi di nascita e morte
+        const births = poissonRandomVariable(currentBirthRate);
+        const deaths = poissonRandomVariable(currentDeathRate);
+
+        // Aggiorniamo la dimensione della popolazione
+        populationSize = Math.max(0, populationSize + births - deaths);
+
+        // Aggiorniamo gli andamenti cumulativi, relativi e normalizzati
+        cumulativeSize += populationSize;
+        const relativeSize = cumulativeSize / generation;
+        const normalizedSize = cumulativeSize / Math.sqrt(generation);
+
+        // Salviamo i dati per questa generazione
+        populationSizes.push(populationSize);
+        cumSizes.push(cumulativeSize);
+        relSizes.push(relativeSize);
+        norSizes.push(normalizedSize);
+      }
+
+      return [populationSizes, cumSizes, relSizes, norSizes];
+    }
+
+    // Funzione per generare variabili casuali da una distribuzione di Poisson
+    function poissonRandomVariable(lambda) {
+      const L = Math.exp(-lambda);
+      let k = 0;
+      let p = 1;
+
+      do {
+        k++;
+        const u = Math.random();
+        p *= u;
+      } while (p > L);
+
+      return k - 1;
     }
 
 
